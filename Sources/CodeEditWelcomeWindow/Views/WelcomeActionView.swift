@@ -7,18 +7,18 @@
 
 import SwiftUI
 
-struct WelcomeActionView: View {
+public struct WelcomeActionView: View {
     var iconName: String
     var title: String
     var action: () -> Void
 
-    init(iconName: String, title: String, action: @escaping () -> Void) {
+    public init(iconName: String, title: String, action: @escaping () -> Void) {
         self.iconName = iconName
         self.title = title
         self.action = action
     }
 
-    var body: some View {
+    public var body: some View {
         Button(action: action, label: {
             HStack(spacing: 7) {
                 Image(systemName: iconName)

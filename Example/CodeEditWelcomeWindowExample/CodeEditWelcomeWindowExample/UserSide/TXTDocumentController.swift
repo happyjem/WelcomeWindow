@@ -6,6 +6,7 @@
 //
 import Cocoa
 import UniformTypeIdentifiers
+import CodeEditWelcomeWindow
 
 final class TXTDocumentController: NSDocumentController {
 

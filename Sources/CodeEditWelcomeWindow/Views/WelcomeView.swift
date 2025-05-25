@@ -9,22 +9,21 @@ import SwiftUI
 import AppKit
 import Foundation
 
-public struct WelcomeView: View {
+public struct WelcomeView<Content: View>: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.controlActiveState) var controlActiveState
 
-    @State private var isHovering = false
     @State private var isHoveringCloseButton = false
 
-    private let documentHandler: ProjectDocumentHandler
     private let dismissWindow: () -> Void
+    private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
 
     public init(
-        documentHandler: ProjectDocumentHandler,
-        dismissWindow: @escaping () -> Void
+        dismissWindow: @escaping () -> Void,
+        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content
     ) {
-        self.documentHandler = documentHandler
         self.dismissWindow = dismissWindow
+        self.contentBuilder = content
     }
 
     private var appVersion: String { Bundle.versionString ?? "" }
@@ -35,8 +34,7 @@ public struct WelcomeView: View {
         let url = URL(fileURLWithPath: "/System/Library/CoreServices/SystemVersion.plist")
         guard let dict = NSDictionary(contentsOf: url),
               let version = dict["ProductUserVisibleVersion"],
-              let build = dict["ProductBuildVersion"]
-        else {
+              let build = dict["ProductBuildVersion"] else {
             return ProcessInfo.processInfo.operatingSystemVersionString
         }
         return "\(version) (\(build))"
@@ -71,7 +69,6 @@ public struct WelcomeView: View {
             mainContent
             dismissButton
         }
-        .onHover { isHovering = $0 }
     }
 
     private var mainContent: some View {
@@ -105,25 +102,7 @@ public struct WelcomeView: View {
 
             HStack {
                 VStack(alignment: .leading, spacing: 8) {
-                    WelcomeActionView(
-                        iconName: "plus.square",
-                        title: NSLocalizedString("Create New Project...", comment: ""),
-                        action: {
-                            documentHandler.createNewDocument()
-                            dismissWindow()
-                        }
-                    )
-                    WelcomeActionView(
-                        iconName: "folder",
-                        title: NSLocalizedString("Open Existing Project...", comment: ""),
-                        action: {
-                            documentHandler.openDocument(at: nil) {
-                                DispatchQueue.main.async {
-                                                dismissWindow()
-                                            }
-                            }
-                        }
-                    )
+                    contentBuilder(dismissWindow)
                 }
             }
             Spacer()
@@ -137,7 +116,6 @@ public struct WelcomeView: View {
             ? Color(.black).opacity(0.2)
             : Color(.white).opacity(controlActiveState == .inactive ? 1.0 : 0.5)
         )
-//        .background(EffectView(.underWindowBackground, blendingMode: .behindWindow))
     }
 
     private var dismissButton: some View {

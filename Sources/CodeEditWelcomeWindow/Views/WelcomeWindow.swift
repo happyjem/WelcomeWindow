@@ -7,13 +7,25 @@
 
 import SwiftUI
 
-struct WelcomeWindow: Scene {
+public struct WelcomeWindow<Content: View>: Scene {
 
-    let documentHandler: ProjectDocumentHandler
+    let content: (_ dismissWindow: @escaping () -> Void) -> Content
+    let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
 
-    var body: some Scene {
+    public init(
+        onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
+        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content
+    ) {
+        self.content = content
+        self.onDrop = onDrop
+    }
+
+    public var body: some Scene {
         Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
-            ContentView(documentHandler: documentHandler)
+            ContentView(
+                content: content,
+                onDrop: onDrop
+            )
             .frame(width: 740, height: 432)
             .task {
                 if let window = NSApp.findWindow(DefaultSceneID.welcome) {
@@ -27,17 +39,18 @@ struct WelcomeWindow: Scene {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
     }
-    
+
     private struct ContentView: View {
-        @Environment(\.dismiss)
-        var dismiss
-        
-        let documentHandler: ProjectDocumentHandler
+
+        let content: (_ dismissWindow: @escaping () -> Void) -> Content
+        let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
 
         var body: some View {
             WelcomeWindowView(
-                documentHandler: documentHandler,
-                dismissWindow: { dismiss() }
+                onDrop: onDrop,
+                content: { dismissWindow in
+                    content(dismissWindow)
+                }
             )
         }
     }

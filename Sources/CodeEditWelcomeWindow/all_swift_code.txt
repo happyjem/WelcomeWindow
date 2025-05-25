@@ -1,0 +1,818 @@
+// The Swift Programming Language
+// https://docs.swift.org/swift-book
+//
+//  URL+Identifiable.swift
+//  CodeEdit
+//
+//  Created by Austin Condiff on 3/5/25.
+//
+
+import Foundation
+
+extension URL: @retroactive Identifiable {
+    public var id: String {
+        absoluteString
+    }
+}
+//
+//  DefaultSceneID.swift
+//  Tests
+//
+//  Created by Giorgi Tchelidze on 23.05.25.
+//
+
+
+public enum DefaultSceneID {
+    public static let welcome = "welcome"
+}
+//
+//  NSApp+Extensions.swift
+//  Tests
+//
+//  Created by Giorgi Tchelidze on 23.05.25.
+//
+
+import AppKit
+import SwiftUI
+
+extension NSApplication {
+    func closeWindow(_ id: String) {
+        windows.first { $0.identifier?.rawValue == id }?.close()
+    }
+
+    func closeWindows(_ ids: [String]) {
+        ids.forEach { closeWindow($0) }
+    }
+
+    func findWindow(_ id: String) -> NSWindow? {
+        windows.first { $0.identifier?.rawValue == id }
+    }
+
+    var openSwiftUIWindowIDs: [String] {
+        windows.compactMap { $0.identifier?.rawValue }
+    }
+}
+
+//
+//  Bundle+Info.swift
+//  CodeEditModules/CodeEditUtils
+//
+//  Created by Lukas Pistrol on 01.05.22.
+//
+
+import Foundation
+
+extension Bundle {
+
+    static var appName: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Unknown App"
+    }
+
+    static var displayName: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+        ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String
+        ?? "Unknown App"
+    }
+
+    static var copyrightString: String? {
+        Bundle.main.object(forInfoDictionaryKey: "NSHumanReadableCopyright") as? String
+    }
+
+    /// Returns the main bundle's version string if available (e.g. 1.0.0)
+    static var versionString: String? {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+    }
+
+    /// Returns the main bundle's build string if available (e.g. 123)
+    static var buildString: String? {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+    }
+
+    static var versionPostfix: String? {
+        Bundle.main.object(forInfoDictionaryKey: "CE_VERSION_POSTFIX") as? String
+    }
+}
+//
+//  DocumentOpenDialogConfiguration.swift
+//  Tests
+//
+//  Created by Giorgi Tchelidze on 23.05.25.
+//
+import UniformTypeIdentifiers
+import SwiftUI
+
+public struct DocumentOpenDialogConfiguration {
+    public let title: String
+    public let allowedContentTypes: [UTType]
+    public let canChooseDirectories: Bool
+    public let transformURL: ((URL) -> URL)?
+
+    public init(
+        title: String,
+        allowedContentTypes: [UTType],
+        canChooseDirectories: Bool = false,
+        transformURL: ((URL) -> URL)? = nil
+    ) {
+        self.title = title
+        self.allowedContentTypes = allowedContentTypes
+        self.canChooseDirectories = canChooseDirectories
+        self.transformURL = transformURL
+    }
+}
+//
+//  NSDocumentt.swift
+//  Tests
+//
+//  Created by Giorgi Tchelidze on 23.05.25.
+//
+
+import AppKit
+
+extension NSDocumentController {
+    public func openDocument(
+        configuration: DocumentOpenDialogConfiguration,
+        onCompletion: @escaping (NSDocument?, Bool) -> Void,
+        onCancel: @escaping () -> Void
+    ) {
+        let dialog = NSOpenPanel()
+        dialog.title = configuration.title
+        dialog.showsHiddenFiles = false
+        dialog.canChooseFiles = true
+        dialog.canChooseDirectories = configuration.canChooseDirectories
+        dialog.allowedContentTypes = configuration.allowedContentTypes
+
+        dialog.begin { result in
+            guard result == .OK, let selectedURL = dialog.url else {
+                onCancel()
+                return
+            }
+
+            let resolvedURL = configuration.transformURL?(selectedURL) ?? selectedURL
+
+            self.openDocument(withContentsOf: resolvedURL, display: true) { document, wasAlreadyOpen, error in
+                if let error {
+                    NSAlert(error: error).runModal()
+                    onCancel()
+                    return
+                }
+
+                guard let document else {
+                    let alert = NSAlert()
+                    alert.messageText = "Failed to open document"
+                    alert.informativeText = resolvedURL.lastPathComponent
+                    alert.runModal()
+                    onCancel()
+                    return
+                }
+
+                onCompletion(document, wasAlreadyOpen)
+            }
+        }
+    }
+}
+//
+//  NSDocumentController+ProjectDocumentHandler.swift
+//  Tests
+//
+//  Created by Giorgi Tchelidze on 23.05.25.
+//
+
+import AppKit
+
+extension NSDocumentController: ProjectDocumentHandler {
+
+    /// Bridge to the document-based API.
+    @MainActor
+    public func openDocument(at url: URL?, completion: @escaping () -> Void) {
+        if let url {
+            openDocument(withContentsOf: url, display: true) { _, _, _ in
+                completion()
+            }
+        } else {
+            let config = DocumentOpenDialogConfiguration(
+                title: "Open Text File",
+                allowedContentTypes: [.plainText]
+            )
+
+            openDocument(
+                configuration: config,
+                onCompletion: { _, _ in
+                    completion()
+                },
+                onCancel: {
+                    
+                }
+            )
+        }
+    }
+
+    /// Create-new maps straight to `newDocument`.
+    @MainActor
+    public func createNewDocument() {
+        newDocument(nil)
+    }
+}
+//
+//  ProjectDocumentHandler.swift
+//  Tests
+//
+//  Created by Giorgi Tchelidze on 23.05.25.
+//
+import SwiftUI
+
+@MainActor
+public protocol ProjectDocumentHandler {
+    func openDocument(at url: URL?, completion: @escaping () -> Void)
+    func createNewDocument()
+}
+//
+//  DocumentSaveDialogConfiguration.swift
+//  Tests
+//
+//  Created by Giorgi Tchelidze on 23.05.25.
+//
+import UniformTypeIdentifiers
+import SwiftUI
+
+public struct DocumentSaveDialogConfiguration {
+    public let title: String
+    public let prompt: String
+    public let defaultFilename: String
+    public let allowedContentTypes: [UTType]
+
+    public init(
+        title: String,
+        prompt: String,
+        defaultFilename: String,
+        allowedContentTypes: [UTType]
+    ) {
+        self.title = title
+        self.prompt = prompt
+        self.defaultFilename = defaultFilename
+        self.allowedContentTypes = allowedContentTypes
+    }
+}
+//
+//  RecentProjectsUtil.swift
+//  CodeEdit
+//
+//  Created by Khan Winter on 10/22/24.
+//
+import AppKit
+
+enum RecentProjectsStore {
+    private static let bookmarksKey = "recentProjectBookmarks"
+    static let didUpdateNotification = Notification.Name("RecentProjectsStore.didUpdate")
+
+    private struct BookmarkEntry: Codable, Equatable {
+        let urlPath: String
+        let bookmarkData: Data
+
+        var url: URL? {
+            var isStale = false
+            return try? URL(
+                resolvingBookmarkData: bookmarkData,
+                options: [.withoutUI, .withSecurityScope],
+                relativeTo: nil,
+                bookmarkDataIsStale: &isStale
+            )
+        }
+
+        static func == (lhs: BookmarkEntry, rhs: BookmarkEntry) -> Bool {
+            lhs.urlPath == rhs.urlPath
+        }
+    }
+
+    // MARK: - Public API
+
+    /// Return all recent project URLs (resolved from bookmarks).
+    static func recentProjectURLs() -> [URL] {
+        loadBookmarks()
+            .compactMap { entry in
+                guard let resolved = entry.url else { return nil }
+                return resolved
+            }
+    }
+
+    /// Notify the store that a project was opened.
+    /// Saves its bookmark and moves it to the front.
+    static func documentOpened(at url: URL) {
+        do {
+            let bookmark = try url.bookmarkData(
+                options: .withSecurityScope,
+                includingResourceValuesForKeys: nil,
+                relativeTo: nil
+            )
+            var bookmarks = loadBookmarks()
+
+            // Remove duplicates
+            bookmarks.removeAll(where: { $0.urlPath == url.path })
+            bookmarks.insert(BookmarkEntry(urlPath: url.path, bookmarkData: bookmark), at: 0)
+
+            saveBookmarks(Array(bookmarks.prefix(100)))
+        } catch {
+            print("❌ Failed to create bookmark for recent project: \(error)")
+        }
+    }
+
+    /// Remove selected projects from the recent list.
+    static func removeRecentProjects(_ urlsToRemove: Set<URL>) -> [URL] {
+        var bookmarks = loadBookmarks()
+        bookmarks.removeAll(where: { entry in urlsToRemove.contains(where: { $0.path == entry.urlPath }) })
+        saveBookmarks(bookmarks)
+        return recentProjectURLs()
+    }
+
+    /// Clear all stored recent projects.
+    static func clearList() {
+        saveBookmarks([])
+    }
+
+    // MARK: - Bookmark Access
+
+    /// Call this before opening a project from recent list.
+    static func beginAccessing(_ url: URL) -> Bool {
+        url.startAccessingSecurityScopedResource()
+    }
+
+    /// Call this after the project is fully opened.
+    static func endAccessing(_ url: URL) {
+        url.stopAccessingSecurityScopedResource()
+    }
+
+    // MARK: - Internal
+
+    private static func loadBookmarks() -> [BookmarkEntry] {
+        guard let data = UserDefaults.standard.data(forKey: bookmarksKey),
+              let decoded = try? PropertyListDecoder().decode([BookmarkEntry].self, from: data)
+        else { return [] }
+        return decoded
+    }
+
+    private static func saveBookmarks(_ entries: [BookmarkEntry]) {
+        guard let data = try? PropertyListEncoder().encode(entries) else { return }
+        UserDefaults.standard.set(data, forKey: bookmarksKey)
+        NotificationCenter.default.post(name: didUpdateNotification, object: nil)
+    }
+}
+//
+//  WelcomeWindowView.swift
+//  CodeEditModules/WelcomeModule
+//
+//  Created by Ziyuan Zhao on 2022/3/18.
+//
+
+import SwiftUI
+import AppKit
+
+public struct WelcomeWindowView: View {
+
+    private let documentHandler: ProjectDocumentHandler
+    private let dismissWindow: () -> Void
+
+    public init(
+        documentHandler: ProjectDocumentHandler,
+        dismissWindow: @escaping () -> Void
+    ) {
+        self.documentHandler = documentHandler
+        self.dismissWindow = dismissWindow
+    }
+    
+    public var body: some View {
+        HStack(spacing: 0) {
+            WelcomeView(
+                documentHandler: documentHandler,
+                dismissWindow: dismissWindow
+            )
+            RecentProjectsListView(
+                documentHandler: documentHandler,
+                dismissWindow: dismissWindow
+            )
+            .frame(width: 280)
+        }
+        .edgesIgnoringSafeArea(.top)
+        .onDrop(of: [.fileURL], isTargeted: .constant(true)) { providers in
+            NSApp.activate(ignoringOtherApps: true)
+            providers.forEach {
+                _ = $0.loadDataRepresentation(for: .fileURL) { data, _ in
+                    if let data, let url = URL(dataRepresentation: data, relativeTo: nil) {
+                        Task {
+//                            await documentHandler.openDocument(at: url) {
+//                                Task { @MainActor in
+//                                    dismissWindow()
+//                                }
+//                            }
+                        }
+                    }
+                }
+            }
+            return true
+        }
+    }
+}
+//
+//  RecentProjectsListView.swift
+//  CodeEdit
+//
+//  Created by Wouter Hennen on 02/02/2023.
+//
+
+import SwiftUI
+import CoreSpotlight
+import AppKit
+
+public struct RecentProjectsListView: View {
+    @State private var selection: Set<URL>
+    @State private var recentProjects: [URL]
+
+    private let documentHandler: ProjectDocumentHandler
+    private let dismissWindow: () -> Void
+
+    public init(documentHandler: ProjectDocumentHandler, dismissWindow: @escaping () -> Void) {
+        self.documentHandler = documentHandler
+        self.dismissWindow = dismissWindow
+        let urls = RecentProjectsStore.recentProjectURLs()
+        self._recentProjects = State(initialValue: urls)
+        self._selection = State(initialValue: Set(urls.prefix(1)))
+    }
+
+    private var listEmptyView: some View {
+        VStack {
+            Spacer()
+            Text(NSLocalizedString("No Recent Projects", comment: ""))
+                .font(.body)
+                .foregroundColor(.secondary)
+            Spacer()
+        }
+    }
+
+    public var body: some View {
+        List(recentProjects, id: \.self, selection: $selection) { project in
+            RecentProjectListItem(projectPath: project)
+        }
+        .listStyle(.sidebar)
+        .contextMenu(forSelectionType: URL.self) { items in
+            if !items.isEmpty {
+                Button("Show in Finder") {
+                    NSWorkspace.shared.activateFileViewerSelecting(Array(items))
+                }
+
+                Button("Copy path\(items.count > 1 ? "s" : "")") {
+                    let pasteBoard = NSPasteboard.general
+                    pasteBoard.clearContents()
+                    pasteBoard.writeObjects(selection.map(\.relativePath) as [NSString])
+                }
+
+                Button("Remove from Recents") {
+                    removeRecentProjects()
+                }
+            }
+        } primaryAction: { items in
+            for url in items {
+                guard RecentProjectsStore.beginAccessing(url) else {
+                    print("❌ Could not access recent project (security scope failure): \(url.path)")
+                    continue
+                }
+
+                documentHandler.openDocument(at: url) {
+                    RecentProjectsStore.endAccessing(url)
+                    dismissWindow()
+                }
+            }
+        }
+        .onCopyCommand {
+            selection.map { NSItemProvider(object: $0.path(percentEncoded: false) as NSString) }
+        }
+        .onDeleteCommand {
+            removeRecentProjects()
+        }
+//        .background(EffectView(.underWindowBackground, blendingMode: .behindWindow))
+        .background {
+            Button("") {
+                selection.forEach { url in
+                    documentHandler.openDocument(at: url) {
+                        dismissWindow()
+                    }
+                }
+            }
+            .keyboardShortcut(.defaultAction)
+            .hidden()
+        }
+        .overlay {
+            if recentProjects.isEmpty {
+                listEmptyView
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: RecentProjectsStore.didUpdateNotification)) { _ in
+            updateRecentProjects()
+        }
+    }
+
+    private func removeRecentProjects() {
+        recentProjects = RecentProjectsStore.removeRecentProjects(selection)
+    }
+
+    private func updateRecentProjects() {
+        recentProjects = RecentProjectsStore.recentProjectURLs()
+    }
+}
+//
+//  WelcomeWindow.swift
+//  CodeEdit
+//
+//  Created by Wouter Hennen on 13/03/2023.
+//
+
+import SwiftUI
+
+public struct WelcomeWindow: Scene {
+
+    let documentHandler: ProjectDocumentHandler
+    
+    public init(documentHandler: ProjectDocumentHandler) {
+        self.documentHandler = documentHandler
+    }
+
+    public var body: some Scene {
+        Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
+            ContentView(documentHandler: documentHandler)
+            .frame(width: 740, height: 432)
+            .task {
+                if let window = NSApp.findWindow(DefaultSceneID.welcome) {
+                    window.standardWindowButton(.closeButton)?.isHidden = true
+                    window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+                    window.standardWindowButton(.zoomButton)?.isHidden = true
+                    window.isMovableByWindowBackground = true
+                }
+            }
+        }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+    }
+    
+    private struct ContentView: View {
+        @Environment(\.dismiss)
+        var dismiss
+        
+        let documentHandler: ProjectDocumentHandler
+
+        var body: some View {
+            WelcomeWindowView(
+                documentHandler: documentHandler,
+                dismissWindow: { dismiss() }
+            )
+        }
+    }
+}
+//
+//  WelcomeView.swift
+//  CodeEditModules/WelcomeModule
+//
+//  Created by Ziyuan Zhao on 2022/3/18.
+//
+
+import SwiftUI
+import AppKit
+import Foundation
+
+public struct WelcomeView: View {
+    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.controlActiveState) var controlActiveState
+
+    @State private var isHovering = false
+    @State private var isHoveringCloseButton = false
+
+    private let documentHandler: ProjectDocumentHandler
+    private let dismissWindow: () -> Void
+
+    public init(
+        documentHandler: ProjectDocumentHandler,
+        dismissWindow: @escaping () -> Void
+    ) {
+        self.documentHandler = documentHandler
+        self.dismissWindow = dismissWindow
+    }
+
+    private var appVersion: String { Bundle.versionString ?? "" }
+    private var appBuild: String { Bundle.buildString ?? "" }
+    private var appVersionPostfix: String { Bundle.versionPostfix ?? "" }
+
+    private var macOSVersion: String {
+        let url = URL(fileURLWithPath: "/System/Library/CoreServices/SystemVersion.plist")
+        guard let dict = NSDictionary(contentsOf: url),
+              let version = dict["ProductUserVisibleVersion"],
+              let build = dict["ProductBuildVersion"]
+        else {
+            return ProcessInfo.processInfo.operatingSystemVersionString
+        }
+        return "\(version) (\(build))"
+    }
+
+    private var xcodeVersion: String? {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.dt.Xcode"),
+              let bundle = Bundle(url: url),
+              let infoDict = bundle.infoDictionary,
+              let version = infoDict["CFBundleShortVersionString"] as? String,
+              let buildURL = URL(string: "\(url)Contents/version.plist"),
+              let buildDict = try? NSDictionary(contentsOf: buildURL, error: ()),
+              let build = buildDict["ProductBuildVersion"]
+        else {
+            return nil
+        }
+        return "\(version) (\(build))"
+    }
+
+    private func copyInformation() {
+        var copyString = "\(Bundle.displayName): \(appVersion)\(appVersionPostfix) (\(appBuild))\n"
+        copyString.append("macOS: \(macOSVersion)\n")
+        if let xcodeVersion { copyString.append("Xcode: \(xcodeVersion)") }
+
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(copyString, forType: .string)
+    }
+
+    public var body: some View {
+        ZStack(alignment: .topLeading) {
+            mainContent
+            dismissButton
+        }
+        .onHover { isHovering = $0 }
+    }
+
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            Spacer().frame(height: 32)
+            ZStack {
+                if colorScheme == .dark {
+                    Rectangle()
+                        .frame(width: 104, height: 104)
+                        .foregroundColor(.accentColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                        .blur(radius: 64)
+                        .opacity(0.5)
+                }
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 128, height: 128)
+            }
+            Text(Bundle.displayName)
+                .font(.system(size: 36, weight: .bold))
+            Text(String(format: NSLocalizedString("Version %@%@ (%@)", comment: ""),
+                        appVersion, appVersionPostfix, appBuild))
+                .textSelection(.enabled)
+                .foregroundColor(.secondary)
+                .font(.system(size: 13.5))
+                .onHover { $0 ? NSCursor.pointingHand.push() : NSCursor.pop() }
+                .onTapGesture { copyInformation() }
+                .help("Copy System Information to Clipboard")
+
+            Spacer().frame(height: 40)
+
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    WelcomeActionView(
+                        iconName: "plus.square",
+                        title: NSLocalizedString("Create New Project...", comment: ""),
+                        action: {
+                            documentHandler.createNewDocument()
+                            dismissWindow()
+                        }
+                    )
+                    WelcomeActionView(
+                        iconName: "folder",
+                        title: NSLocalizedString("Open Existing Project...", comment: ""),
+                        action: {
+                            documentHandler.openDocument(at: nil) {
+                                DispatchQueue.main.async {
+                                                dismissWindow()
+                                            }
+                            }
+                        }
+                    )
+                }
+            }
+            Spacer()
+        }
+        .padding(.top, 20)
+        .padding(.horizontal, 56)
+        .padding(.bottom, 16)
+        .frame(width: 460)
+        .background(
+            colorScheme == .dark
+            ? Color(.black).opacity(0.2)
+            : Color(.white).opacity(controlActiveState == .inactive ? 1.0 : 0.5)
+        )
+//        .background(EffectView(.underWindowBackground, blendingMode: .behindWindow))
+    }
+
+    private var dismissButton: some View {
+        Button(
+            action: dismissWindow,
+            label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(isHoveringCloseButton ? Color(.secondaryLabelColor) : Color(.tertiaryLabelColor))
+            }
+        )
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("Close"))
+        .onHover { hover in
+            withAnimation(.linear(duration: 0.15)) {
+                isHoveringCloseButton = hover
+            }
+        }
+        .padding(10)
+        .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+    }
+}
+//
+//  RecentProjectListItem.swift
+//  CodeEditModules/WelcomeModule
+//
+//  Created by Ziyuan Zhao on 2022/3/18.
+//
+
+import SwiftUI
+
+extension String {
+    func abbreviatingWithTildeInPath() -> String {
+        (self as NSString).abbreviatingWithTildeInPath
+    }
+}
+
+struct RecentProjectListItem: View {
+    let projectPath: URL
+
+    init(projectPath: URL) {
+        self.projectPath = projectPath
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(nsImage: NSWorkspace.shared.icon(forFile: projectPath.path(percentEncoded: false)))
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 32, height: 32)
+            VStack(alignment: .leading) {
+                Text(projectPath.lastPathComponent)
+                    .foregroundColor(.primary)
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)
+                Text(projectPath.deletingLastPathComponent().path(percentEncoded: false).abbreviatingWithTildeInPath())
+                    .foregroundColor(.secondary)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+                    .truncationMode(.head)
+            }
+        }
+        .frame(height: 36)
+        .contentShape(Rectangle())
+    }
+}
+//
+//  WelcomeActionView.swift
+//  CodeEditModules/WelcomeModule
+//
+//  Created by Ziyuan Zhao on 2022/3/18.
+//
+
+import SwiftUI
+
+struct WelcomeActionView: View {
+    var iconName: String
+    var title: String
+    var action: () -> Void
+
+    init(iconName: String, title: String, action: @escaping () -> Void) {
+        self.iconName = iconName
+        self.title = title
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action, label: {
+            HStack(spacing: 7) {
+                Image(systemName: iconName)
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundColor(.secondary)
+                    .font(.system(size: 20))
+                    .frame(width: 24)
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold))
+                Spacer()
+            }
+        })
+        .buttonStyle(WelcomeActionButtonStyle())
+    }
+}
+
+struct WelcomeActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(Rectangle())
+            .padding(7)
+            .frame(height: 36)
+            .background(Color(.labelColor).opacity(configuration.isPressed ? 0.1 : 0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}

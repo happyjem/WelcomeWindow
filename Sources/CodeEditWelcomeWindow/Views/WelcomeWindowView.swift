@@ -8,29 +8,32 @@
 import SwiftUI
 import AppKit
 
-public struct WelcomeWindowView: View {
+public struct WelcomeWindowView<Content: View>: View {
 
-    private let documentHandler: ProjectDocumentHandler
-    private let dismissWindow: () -> Void
+    @Environment(\.dismiss) private var dismissWindow
+
+    private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
+    private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
 
     public init(
-        documentHandler: ProjectDocumentHandler,
-        dismissWindow: @escaping () -> Void
+        onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
+        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content
     ) {
-        self.documentHandler = documentHandler
-        self.dismissWindow = dismissWindow
+        self.onDrop = onDrop
+        self.contentBuilder = content
     }
-    
+
     public var body: some View {
         HStack(spacing: 0) {
             WelcomeView(
-                documentHandler: documentHandler,
-                dismissWindow: dismissWindow
+                dismissWindow: dismissWindow.callAsFunction,
+                content: contentBuilder
             )
-            RecentProjectsListView(
-                documentHandler: documentHandler,
-                dismissWindow: dismissWindow
-            )
+
+//            RecentProjectsListView(
+//                documentHandler: documentHandler,
+//                dismissWindow: dismissWindow.callAsFunction
+//            )
             .frame(width: 280)
         }
         .edgesIgnoringSafeArea(.top)
@@ -39,12 +42,8 @@ public struct WelcomeWindowView: View {
             providers.forEach {
                 _ = $0.loadDataRepresentation(for: .fileURL) { data, _ in
                     if let data, let url = URL(dataRepresentation: data, relativeTo: nil) {
-                        Task {
-                            await documentHandler.openDocument(at: url) {
-                                Task { @MainActor in
-                                    dismissWindow()
-                                }
-                            }
+                        Task { @MainActor in
+                            onDrop?(url, dismissWindow.callAsFunction)
                         }
                     }
                 }
