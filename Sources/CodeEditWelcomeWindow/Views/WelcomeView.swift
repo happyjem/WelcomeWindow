@@ -18,6 +18,8 @@ public struct WelcomeView<Content: View>: View {
     private let dismissWindow: () -> Void
     private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
 
+    @FocusState private var isFocused: Bool
+
     public init(
         dismissWindow: @escaping () -> Void,
         @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content
@@ -111,11 +113,16 @@ public struct WelcomeView<Content: View>: View {
         .padding(.horizontal, 56)
         .padding(.bottom, 16)
         .frame(width: 460)
-        .background(
-            colorScheme == .dark
-            ? Color(.black).opacity(0.2)
-            : Color(.white).opacity(controlActiveState == .inactive ? 1.0 : 0.5)
-        )
+        .frame(maxHeight: .infinity)
+        .background {
+            if self.colorScheme == .dark {
+                Color(.black).opacity(0.275)
+                    .background(.ultraThickMaterial)
+            } else {
+                Color(.white)
+                    .background(.regularMaterial)
+            }
+        }
     }
 
     private var dismissButton: some View {
@@ -128,12 +135,24 @@ public struct WelcomeView<Content: View>: View {
         )
         .buttonStyle(.plain)
         .accessibilityLabel(Text("Close"))
+        .focused($isFocused)
+        .modifier(FocusRingModifier(isFocused: isFocused, shape: .circle))
+        .onAppear {
+            DispatchQueue.main.async {
+                isFocused = false
+            }
+        }
         .onHover { hover in
             withAnimation(.linear(duration: 0.15)) {
                 isHoveringCloseButton = hover
             }
         }
         .padding(10)
+//        .background(Color(NSColor.keyboardFocusIndicatorColor))
+
         .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
     }
 }
+
+
+

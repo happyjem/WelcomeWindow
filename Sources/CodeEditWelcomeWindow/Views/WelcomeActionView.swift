@@ -11,6 +11,9 @@ public struct WelcomeActionView: View {
     var iconName: String
     var title: String
     var action: () -> Void
+    
+
+    @FocusState private var isfocused: Bool
 
     public init(iconName: String, title: String, action: @escaping () -> Void) {
         self.iconName = iconName
@@ -24,7 +27,7 @@ public struct WelcomeActionView: View {
                 Image(systemName: iconName)
                     .aspectRatio(contentMode: .fit)
                     .foregroundColor(.secondary)
-                    .font(.system(size: 20))
+                    .font(.system(size: 17, weight: .medium))
                     .frame(width: 24)
                 Text(title)
                     .font(.system(size: 13, weight: .semibold))
@@ -32,6 +35,8 @@ public struct WelcomeActionView: View {
             }
         })
         .buttonStyle(WelcomeActionButtonStyle())
+        .focused($isfocused)
+        .modifier(FocusRingModifier(isFocused: isfocused, shape: .rect(cornerRadius: 8)))
     }
 }
 
