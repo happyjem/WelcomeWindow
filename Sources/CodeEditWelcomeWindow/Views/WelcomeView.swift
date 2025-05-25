@@ -17,15 +17,18 @@ public struct WelcomeView<Content: View>: View {
 
     private let dismissWindow: () -> Void
     private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
+    private let viewCount: Int
 
     @FocusState private var isFocused: Bool
 
     public init(
         dismissWindow: @escaping () -> Void,
-        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content
+        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content,
+        viewCount: Int = 0
     ) {
         self.dismissWindow = dismissWindow
         self.contentBuilder = content
+        self.viewCount = viewCount
     }
 
     private var appVersion: String { Bundle.versionString ?? "" }
@@ -104,7 +107,13 @@ public struct WelcomeView<Content: View>: View {
 
             HStack {
                 VStack(alignment: .leading, spacing: 8) {
+                    if viewCount < 3 {
+                        Spacer()
+                    }
                     contentBuilder(dismissWindow)
+                    if viewCount < 3 {
+                        Spacer()
+                    }
                 }
             }
             Spacer()
@@ -148,8 +157,6 @@ public struct WelcomeView<Content: View>: View {
             }
         }
         .padding(10)
-//        .background(Color(NSColor.keyboardFocusIndicatorColor))
-
         .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
     }
 }

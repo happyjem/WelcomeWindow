@@ -1,27 +1,24 @@
 //
 //  DocumentOpenDialogConfiguration.swift
-//  Tests
+//  CodeEditWelcomeWindow
 //
-//  Created by Giorgi Tchelidze on 23.05.25.
+//  Created by Giorgi Tchelidze on 25.05.25.
 //
-import UniformTypeIdentifiers
 import SwiftUI
+import UniformTypeIdentifiers
 
 public struct DocumentOpenDialogConfiguration {
-    public let title: String
-    public let allowedContentTypes: [UTType]
-    public let canChooseDirectories: Bool
-    public let transformURL: ((URL) -> URL)?
+    public var title: String
+    public var allowedContentTypes: [UTType]
+    public var directoryURL: URL?
 
     public init(
-        title: String,
-        allowedContentTypes: [UTType],
-        canChooseDirectories: Bool = false,
-        transformURL: ((URL) -> URL)? = nil
+        title: String = "Open Document",
+        allowedContentTypes: [UTType] = [UTType.plainText],
+        directoryURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
     ) {
         self.title = title
         self.allowedContentTypes = allowedContentTypes
-        self.canChooseDirectories = canChooseDirectories
-        self.transformURL = transformURL
+        self.directoryURL = directoryURL
     }
 }

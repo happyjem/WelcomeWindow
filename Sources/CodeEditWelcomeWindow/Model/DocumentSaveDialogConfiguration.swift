@@ -1,27 +1,33 @@
 //
 //  DocumentSaveDialogConfiguration.swift
-//  Tests
+//  CodeEditWelcomeWindow
 //
-//  Created by Giorgi Tchelidze on 23.05.25.
+//  Created by Giorgi Tchelidze on 25.05.25.
 //
-import UniformTypeIdentifiers
 import SwiftUI
+import UniformTypeIdentifiers
 
 public struct DocumentSaveDialogConfiguration {
-    public let title: String
-    public let prompt: String
-    public let defaultFilename: String
-    public let allowedContentTypes: [UTType]
+    public var prompt: String
+    public var nameFieldLabel: String
+    public var defaultFileName: String
+    public var allowedContentTypes: [UTType]
+    public var title: String
+    public var directoryURL: URL?
 
     public init(
-        title: String,
-        prompt: String,
-        defaultFilename: String,
-        allowedContentTypes: [UTType]
+        prompt: String = "Create Document",
+        nameFieldLabel: String = "File Name:",
+        defaultFileName: String = "Untitled",
+        allowedContentTypes: [UTType] = [UTType.plainText],
+        title: String = "Create a New Document",
+        directoryURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
     ) {
-        self.title = title
         self.prompt = prompt
-        self.defaultFilename = defaultFilename
+        self.nameFieldLabel = nameFieldLabel
+        self.defaultFileName = defaultFileName
         self.allowedContentTypes = allowedContentTypes
+        self.title = title
+        self.directoryURL = directoryURL
     }
 }

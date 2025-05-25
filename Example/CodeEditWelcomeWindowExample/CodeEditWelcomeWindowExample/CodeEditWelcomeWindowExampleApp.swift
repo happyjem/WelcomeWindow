@@ -11,44 +11,44 @@ import CodeEditWelcomeWindow
 @main
 struct CodeEditWelcomeWindowExampleApp: App {
 
+    @Environment(\.openWindow) private var openWindow
     private let handler = TXTDocumentController.shared
 
     var body: some Scene {
         Group {
             WelcomeWindow(
-                onDrop: { url, dismiss in
-                    print("File dropped at: \(url.path)")
-
-                    Task {
-//                        handler.openDocument(at: url) {
-//                            Task { @MainActor in
-//                                dismiss()
-//                            }
-//                        }
-                    }
-                },
                 content: { dismiss in
-                    WelcomeActionView(
+                    ( WelcomeActionView(
                         iconName: "circle.fill",
                         title: "New Text Document",
-                        action: { handler.createNewDocumentWithDialog(onCompletion: { dismiss() }) }
-                    )
-                    WelcomeActionView(
-                        iconName: "square.fill",
-                        title: "Git Clone Text Document",
-                        action: { print("Show some git clone UI") }
-                    )
-                    WelcomeActionView(
+                        action: { handler.createNewDocumentWithDialog(
+                            configuration: .init(title: "Create new text document"),
+                            onCompletion: { dismiss() })
+                        }
+                    ),
+//                      WelcomeActionView(
+//                        iconName: "square.fill",
+//                        title: "Git Clone Text Document",
+//                        action: { print("Show some git clone UI") }
+//                      ),
+                      WelcomeActionView(
                         iconName: "triangle.fill",
                         title: "Open Text Document",
                         action: {
-                            handler.openDocument(nil)
-//                            {
-//                                print("Document opened successfully")
-//                                dismiss()
-//                            }
+                            handler.openDocumentWithDialog(
+                                onDialogPresented: { dismiss() },
+                                onCancel: { openWindow(id: "welcome") }
+                            )
                         }
-                    )
+                      )
+                )
+                },
+                onDrop: { url, dismiss in
+                    print("File dropped at: \(url.path)")
+                    
+                    Task {
+                        handler.openDocument(at: url, onCompletion: { dismiss() })
+                    }
                 }
             )
 

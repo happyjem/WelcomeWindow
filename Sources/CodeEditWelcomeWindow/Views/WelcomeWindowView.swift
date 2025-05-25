@@ -12,28 +12,31 @@ public struct WelcomeWindowView<Content: View>: View {
 
     @Environment(\.dismiss) private var dismissWindow
 
-    private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
     private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
+    private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
+    private let viewCount: Int
 
     public init(
+        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
-        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content
+        viewCount: Int = 0
     ) {
-        self.onDrop = onDrop
         self.contentBuilder = content
+        self.onDrop = onDrop
+        self.viewCount = viewCount
     }
 
     public var body: some View {
         HStack(spacing: 0) {
             WelcomeView(
                 dismissWindow: dismissWindow.callAsFunction,
-                content: contentBuilder
+                content: contentBuilder,
+                viewCount: viewCount
             )
 
-//            RecentProjectsListView(
-//                documentHandler: documentHandler,
-//                dismissWindow: dismissWindow.callAsFunction
-//            )
+            RecentProjectsListView(
+                dismissWindow: dismissWindow.callAsFunction
+            )
             
         }
         .clipShape(.rect(cornerRadius: 8))
