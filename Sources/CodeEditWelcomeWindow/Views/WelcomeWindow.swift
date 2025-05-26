@@ -60,9 +60,10 @@ public struct WelcomeWindow: Scene {
             .task {
                 if let window = NSApp.findWindow(DefaultSceneID.welcome) {
 
-                    window.styleMask = .borderless
+                    window.styleMask = .fullSizeContentView
                     window.backgroundColor = .clear
                     window.isMovableByWindowBackground = true
+                    window.hasShadow = true
 
                 }
             }
