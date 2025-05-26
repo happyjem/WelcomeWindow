@@ -15,7 +15,7 @@
   </a>
 </p>
 
-A highly customizable welcome window built for `NSDocument`-based macOS applications. Designed to provide a native and elegant onboarding experience for your app, with support for new/open document actions, drag-and-drop, and dynamic layouts.
+A highly customizable welcome window built for `NSDocument`-based macOS applications. Designed to provide a native and elegant welcome experience for your app at launch, with support for new/open document actions, drag-and-drop, and dynamic layouts.
 
 ![GitHub release](https://img.shields.io/github/v/release/CodeEditApp/CodeEditWelcomeWindow?color=orange&label=latest%20release&sort=semver&style=flat-square)
 ![Github Tests](https://img.shields.io/github/actions/workflow/status/CodeEditApp/CodeEditWelcomeWindow/tests.yml?branch=main&label=tests&style=flat-square)
@@ -23,9 +23,6 @@ A highly customizable welcome window built for `NSDocument`-based macOS applicat
 ![GitHub Repo stars](https://img.shields.io/github/stars/CodeEditApp/CodeEditWelcomeWindow?style=flat-square)
 ![GitHub forks](https://img.shields.io/github/forks/CodeEditApp/CodeEditWelcomeWindow?style=flat-square)
 [![Discord Badge](https://img.shields.io/discord/951544472238444645?color=5865F2&label=Discord&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/vChUXVf9Em)
-
-> [!IMPORTANT]
-> This package is ideal for macOS apps that use `NSDocument` and want to offer a smooth first-launch experience. It is designed with SwiftUI and integrates easily with modern app lifecycles.
 
 ![image](https://github.com/user-attachments/assets/0e0dbaaa-3b2a-4132-b073-5b8971750668)
 
