@@ -10,6 +10,9 @@ import CoreSpotlight
 import AppKit
 
 public struct RecentProjectsListView: View {
+    
+    
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selection: Set<URL>
     @State private var recentProjects: [URL]
 
@@ -72,7 +75,15 @@ public struct RecentProjectsListView: View {
         .onDeleteCommand {
             removeRecentProjects()
         }
-//        .background(EffectView(.underWindowBackground, blendingMode: .behindWindow))
+        .background {
+            if self.colorScheme == .dark {
+                Color(.black).opacity(0.075)
+                    .background(.thickMaterial)
+            } else {
+                Color(.white).opacity(0.6)
+                    .background(.regularMaterial)
+            }
+        }
         .background {
             Button("") {
                 selection.forEach { url in

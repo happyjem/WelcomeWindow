@@ -23,7 +23,9 @@ struct CodeEditWelcomeWindowExampleApp: App {
                         title: "New Text Document",
                         action: { handler.createNewDocumentWithDialog(
                             configuration: .init(title: "Create new text document"),
-                            onCompletion: { dismiss() })
+                            onCompletion: { dismiss() }
+                        )
+                            
                         }
                     ),
 //                      WelcomeActionView(

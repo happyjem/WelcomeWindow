@@ -27,7 +27,9 @@ extension NSDocumentController {
         panel.level = .modalPanel
         panel.directoryURL = configuration.directoryURL
 
-        onDialogPresented()
+        DispatchQueue.main.async {
+            onDialogPresented()
+        }
 
         let response = panel.runModal()
         guard response == .OK, let fileURL = panel.url else {
@@ -65,17 +67,20 @@ extension NSDocumentController {
         panel.allowedContentTypes = configuration.allowedContentTypes
         panel.directoryURL = configuration.directoryURL
 
-        onDialogPresented()
-
-        panel.begin { result in
-            guard result == .OK, let selectedURL = panel.url else {
-                onCancel()
-                return
-            }
-
-            self.openDocument(at: selectedURL, onCompletion: onCompletion, onError: { _ in onCancel() })
+        // Now safe to dismiss the welcome window immediately (next tick)
+        DispatchQueue.main.async {
+            onDialogPresented()
         }
+
+        let result = panel.runModal()
+        guard result == .OK, let selectedURL = panel.url else {
+            onCancel()
+            return
+        }
+
+        self.openDocument(at: selectedURL, onCompletion: onCompletion, onError: { _ in onCancel() })
     }
+
 
     @MainActor
     public func openDocument(

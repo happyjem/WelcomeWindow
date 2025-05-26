@@ -53,7 +53,6 @@ WelcomeWindow(
                 title: "Open Text Document",
                 action: {
                     handler.openDocumentWithDialog(
-                        onDialogPresented: { dismiss() },
                         onCancel: { openWindow(id: "welcome") }
                     )
                 }
