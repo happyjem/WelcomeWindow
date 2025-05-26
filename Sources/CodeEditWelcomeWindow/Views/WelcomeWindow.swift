@@ -6,8 +6,6 @@
 //
 import SwiftUI
 
-import SwiftUI
-
 public struct WelcomeWindow: Scene {
     private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> AnyView
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
@@ -59,16 +57,23 @@ public struct WelcomeWindow: Scene {
             .frame(width: 740, height: 432)
             .task {
                 if let window = NSApp.findWindow(DefaultSceneID.welcome) {
+                    
 
-                    window.styleMask = .fullSizeContentView
-                    window.backgroundColor = .clear
+                    window.standardWindowButton(.closeButton)?.isHidden = true
+                    window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+                    window.standardWindowButton(.zoomButton)?.isHidden = true
+                    
                     window.isMovableByWindowBackground = true
-                    window.hasShadow = true
-
+                    
+                  
                 }
             }
+            
         }
+        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
+        
+
     }
 
     private struct ContentView: View {

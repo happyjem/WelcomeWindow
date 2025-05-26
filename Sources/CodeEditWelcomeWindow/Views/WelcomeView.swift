@@ -115,6 +115,7 @@ public struct WelcomeView<Content: View>: View {
                         Spacer()
                     }
                 }
+                .focusSection()
             }
             Spacer()
         }

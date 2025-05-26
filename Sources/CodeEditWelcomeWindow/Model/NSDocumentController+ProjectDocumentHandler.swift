@@ -67,10 +67,8 @@ extension NSDocumentController {
         panel.allowedContentTypes = configuration.allowedContentTypes
         panel.directoryURL = configuration.directoryURL
 
-        // Now safe to dismiss the welcome window immediately (next tick)
-        DispatchQueue.main.async {
-            onDialogPresented()
-        }
+        onDialogPresented()
+
 
         let result = panel.runModal()
         guard result == .OK, let selectedURL = panel.url else {
