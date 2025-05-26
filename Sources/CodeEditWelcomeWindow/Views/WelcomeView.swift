@@ -131,6 +131,7 @@ public struct WelcomeView<Content: View>: View {
                 Color(.white)
                     .background(.regularMaterial)
             }
+
         }
     }
 

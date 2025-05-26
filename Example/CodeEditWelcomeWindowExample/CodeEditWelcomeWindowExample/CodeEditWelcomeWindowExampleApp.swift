@@ -51,12 +51,6 @@ struct CodeEditWelcomeWindowExampleApp: App {
                     }
                 }
             )
-
-            WindowGroup("Hello world") {
-                VStack {
-                    Text("Jello")
-                }
-            }
         }
     }
 }

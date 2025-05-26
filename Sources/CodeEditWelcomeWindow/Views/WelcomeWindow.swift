@@ -59,14 +59,14 @@ public struct WelcomeWindow: Scene {
             .frame(width: 740, height: 432)
             .task {
                 if let window = NSApp.findWindow(DefaultSceneID.welcome) {
-                    window.standardWindowButton(.closeButton)?.isHidden = true
-                    window.standardWindowButton(.miniaturizeButton)?.isHidden = true
-                    window.standardWindowButton(.zoomButton)?.isHidden = true
+
+                    window.styleMask = .borderless
+                    window.backgroundColor = .clear
                     window.isMovableByWindowBackground = true
+
                 }
             }
         }
-        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
     }
 
