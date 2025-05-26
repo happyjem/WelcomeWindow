@@ -40,6 +40,7 @@ public struct RecentProjectsListView: View {
             RecentProjectListItem(projectPath: project)
         }
         .listStyle(.sidebar)
+        .scrollContentBackground(.hidden)
         .contextMenu(forSelectionType: URL.self) { items in
             if !items.isEmpty {
                 Button("Show in Finder") {
