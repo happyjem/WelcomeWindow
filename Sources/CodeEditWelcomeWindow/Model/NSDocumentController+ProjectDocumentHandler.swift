@@ -39,14 +39,7 @@ extension NSDocumentController {
 
         do {
             try "".write(to: fileURL, atomically: true, encoding: .utf8)
-            self.openDocument(withContentsOf: fileURL, display: true) { _, _, error in
-                if let error {
-                    NSAlert(error: error).runModal()
-                    onCancel()
-                } else {
-                    onCompletion()
-                }
-            }
+            self.openDocument(at: fileURL, onCompletion: onCompletion, onError: { _ in onCancel() })
         } catch {
             NSAlert(error: error).runModal()
             onCancel()
@@ -91,6 +84,8 @@ extension NSDocumentController {
                 NSAlert(error: error).runModal()
                 onError(error)
             } else {
+                // Log to recent projects
+                RecentProjectsStore.documentOpened(at: url)
                 onCompletion()
             }
         }

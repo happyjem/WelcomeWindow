@@ -7,52 +7,92 @@
 import SwiftUI
 
 public struct WelcomeWindow<CustomRecentsListView: View>: Scene {
-    
     private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> AnyView
     private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)?
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
-
     private let viewCount: Int
 
     // MARK: - 1 View
+    // Default: use built-in RecentProjectsListView
     public init<A: View>(
         content: @escaping (_ dismissWindow: @escaping () -> Void) -> A,
-        customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)? = nil,
+        onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
+    ) where CustomRecentsListView == EmptyView {
+        self.contentBuilder = { dismiss in AnyView(content(dismiss)) }
+        self.customRecentsList = nil
+        self.onDrop = onDrop
+        self.viewCount = 1
+    }
+
+    // Custom recents list
+    public init<A: View>(
+        content: @escaping (_ dismissWindow: @escaping () -> Void) -> A,
+        customRecentsList: @escaping (_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
     ) {
         self.contentBuilder = { dismiss in AnyView(content(dismiss)) }
-        self.onDrop = onDrop
         self.customRecentsList = customRecentsList
+        self.onDrop = onDrop
         self.viewCount = 1
     }
 
     // MARK: - 2 Views
+    // Default: use built-in RecentProjectsListView
     public init<A: View, B: View>(
         content: @escaping (_ dismissWindow: @escaping () -> Void) -> (A, B),
-        customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)? = nil,
+        onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
+    ) where CustomRecentsListView == EmptyView {
+        self.contentBuilder = { dismiss in
+            let views = content(dismiss)
+            return AnyView(TupleView((views.0, views.1)))
+        }
+        self.customRecentsList = nil
+        self.onDrop = onDrop
+        self.viewCount = 2
+    }
+
+    // Custom recents list
+    public init<A: View, B: View>(
+        content: @escaping (_ dismissWindow: @escaping () -> Void) -> (A, B),
+        customRecentsList: @escaping (_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
     ) {
         self.contentBuilder = { dismiss in
             let views = content(dismiss)
             return AnyView(TupleView((views.0, views.1)))
         }
-        self.onDrop = onDrop
         self.customRecentsList = customRecentsList
+        self.onDrop = onDrop
         self.viewCount = 2
     }
 
     // MARK: - 3 Views
+    // Default: use built-in RecentProjectsListView
     public init<A: View, B: View, C: View>(
         content: @escaping (_ dismissWindow: @escaping () -> Void) -> (A, B, C),
-        customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)? = nil,
+        onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
+    ) where CustomRecentsListView == EmptyView {
+        self.contentBuilder = { dismiss in
+            let views = content(dismiss)
+            return AnyView(TupleView((views.0, views.1, views.2)))
+        }
+        self.customRecentsList = nil
+        self.onDrop = onDrop
+        self.viewCount = 3
+    }
+
+    // Custom recents list
+    public init<A: View, B: View, C: View>(
+        content: @escaping (_ dismissWindow: @escaping () -> Void) -> (A, B, C),
+        customRecentsList: @escaping (_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
     ) {
         self.contentBuilder = { dismiss in
             let views = content(dismiss)
             return AnyView(TupleView((views.0, views.1, views.2)))
         }
-        self.onDrop = onDrop
         self.customRecentsList = customRecentsList
+        self.onDrop = onDrop
         self.viewCount = 3
     }
 
@@ -63,38 +103,28 @@ public struct WelcomeWindow<CustomRecentsListView: View>: Scene {
                 onDrop: onDrop,
                 customRecentsList: customRecentsList,
                 viewCount: viewCount
-
             )
             .frame(width: 740, height: 432)
             .task {
                 if let window = NSApp.findWindow(DefaultSceneID.welcome) {
-                    
-
                     window.styleMask.insert(.borderless)
                     window.standardWindowButton(.closeButton)?.isHidden = true
                     window.standardWindowButton(.miniaturizeButton)?.isHidden = true
                     window.standardWindowButton(.zoomButton)?.isHidden = true
-                    
                     window.backingType = .buffered
                     window.backgroundColor = .clear
                     window.isMovableByWindowBackground = true
-                    
-                  
                 }
             }
-            
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
-        
-
     }
 
     private struct ContentView: View {
         let content: (_ dismissWindow: @escaping () -> Void) -> AnyView
         let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
         let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)?
-
         let viewCount: Int
 
         var body: some View {
