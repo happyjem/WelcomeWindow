@@ -8,23 +8,29 @@
 import SwiftUI
 import AppKit
 
-public struct WelcomeWindowView<Content: View>: View {
+public struct WelcomeWindowView<Content: View, CustomRecentsListView: View>: View {
 
     @Environment(\.dismiss) private var dismissWindow
 
     private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
+    private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)?
+
+
     private let viewCount: Int
 
     public init(
         @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
-        viewCount: Int = 0
+        viewCount: Int = 0,
+        customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)? = nil
     ) {
         self.contentBuilder = content
         self.onDrop = onDrop
         self.viewCount = viewCount
+        self.customRecentsList = customRecentsList
     }
+
 
     public var body: some View {
         HStack(spacing: 0) {
@@ -34,9 +40,11 @@ public struct WelcomeWindowView<Content: View>: View {
                 viewCount: viewCount
             )
 
-            RecentProjectsListView(
-                dismissWindow: dismissWindow.callAsFunction
-            )
+            if let customList = customRecentsList {
+                customList(dismissWindow.callAsFunction)
+            } else {
+                RecentProjectsListView(dismissWindow: dismissWindow.callAsFunction)
+            }
         }
         .clipShape(.rect(cornerRadius: 8))
         .cursor(.current)

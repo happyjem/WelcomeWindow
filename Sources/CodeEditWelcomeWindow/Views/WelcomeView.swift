@@ -17,6 +17,7 @@ public struct WelcomeView<Content: View>: View {
 
     private let dismissWindow: () -> Void
     private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
+
     private let viewCount: Int
 
     @FocusState private var isFocused: Bool

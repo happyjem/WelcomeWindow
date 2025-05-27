@@ -45,6 +45,12 @@ struct CodeEditWelcomeWindowExampleApp: App {
                       )
                 )
                 },
+                customRecentsList: { dismiss in
+                    List {
+                        RecentProjectListItem(projectPath: .init(filePath: "/path/to/project")!)
+                
+                    }
+                },
                 onDrop: { url, dismiss in
                     print("File dropped at: \(url.path)")
                     
@@ -52,6 +58,7 @@ struct CodeEditWelcomeWindowExampleApp: App {
                         handler.openDocument(at: url, onCompletion: { dismiss() })
                     }
                 }
+
             )
         }
     }
