@@ -27,9 +27,7 @@ extension NSDocumentController {
         panel.level = .modalPanel
         panel.directoryURL = configuration.directoryURL
 
-        DispatchQueue.main.async {
-            onDialogPresented()
-        }
+        DispatchQueue.main.async { onDialogPresented() }
 
         let response = panel.runModal()
         guard response == .OK, let fileURL = panel.url else {
@@ -55,14 +53,15 @@ extension NSDocumentController {
     ) {
         let panel = NSOpenPanel()
         panel.title = configuration.title
-        panel.canChooseFiles = true
+        panel.canChooseFiles = configuration.canChooseFiles
         panel.canChooseDirectories = configuration.canChooseDirectories
         panel.allowedContentTypes = configuration.allowedContentTypes
         panel.directoryURL = configuration.directoryURL
+        panel.level = .modalPanel
 
  
-       
-        onDialogPresented()
+        DispatchQueue.main.async { onDialogPresented() }
+ 
   
   
         let result = panel.runModal()
@@ -92,6 +91,8 @@ extension NSDocumentController {
             } else {
                 // Log to recent projects
                 RecentProjectsStore.documentOpened(at: url)
+                
+                NSApp.activate(ignoringOtherApps: true)
                 onCompletion()
             }
         }

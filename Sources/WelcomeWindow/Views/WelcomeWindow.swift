@@ -112,6 +112,7 @@ public struct WelcomeWindow<CustomRecentsListView: View>: Scene {
                         window.standardWindowButton(.closeButton)?.isHidden = true
                         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
                         window.standardWindowButton(.zoomButton)?.isHidden = true
+                        window.hasShadow = true
                         window.isMovableByWindowBackground = true
                     }
                 }

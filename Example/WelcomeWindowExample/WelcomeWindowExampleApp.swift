@@ -31,11 +31,15 @@ struct WelcomeWindowExampleApp: App {
                         iconName: "triangle.fill",
                         title: "Open Text Document",
                         action: {
-                            NSDocumentController.shared.openDocumentWithDialog(
-                                configuration: .init(canChooseDirectories: true),
-                                onDialogPresented: { dismiss() },
-                                onCancel: { openWindow(id: "welcome") }
-                            )
+                        
+                            
+                                NSDocumentController.shared.openDocumentWithDialog(
+                                    configuration: .init(canChooseDirectories: true),
+                                    onDialogPresented: { dismiss() },
+                                    onCancel: { openWindow(id: "welcome") }
+                                )
+                    
+                    
                         }
                       )
                     )
@@ -49,6 +53,7 @@ struct WelcomeWindowExampleApp: App {
                 }
                 
             )
+
         }
     }
 }
