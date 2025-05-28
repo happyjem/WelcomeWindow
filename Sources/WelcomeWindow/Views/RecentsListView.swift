@@ -16,6 +16,7 @@ public struct RecentsListView: View {
 
     @Binding private var recentProjects: [URL]
     @Binding private var selection: Set<URL>
+    @State private var rightClickedItems: Set<URL> = []
 
     @FocusState.Binding private var focusedField: FocusTarget?
     private let dismissWindow: () -> Void
@@ -62,11 +63,11 @@ public struct RecentsListView: View {
                 Button("Copy path\(items.count > 1 ? "s" : "")") {
                     let pasteBoard = NSPasteboard.general
                     pasteBoard.clearContents()
-                    pasteBoard.writeObjects(selection.map(\.relativePath) as [NSString])
+                    pasteBoard.writeObjects(items.map(\.relativePath) as [NSString])
                 }
 
                 Button("Remove from Recents") {
-                    removeRecentProjects()
+                    removeRecentProjects(urls: Set(items))
                 }
             }
         } primaryAction: { items in
@@ -114,8 +115,9 @@ public struct RecentsListView: View {
 
     // MARK: - Actions
 
-    private func removeRecentProjects() {
-        recentProjects = RecentsStore.removeRecentProjects(selection)
+    private func removeRecentProjects(urls: Set<URL>? = nil) {
+        let targets = urls ?? selection
+        recentProjects = RecentsStore.removeRecentProjects(targets)
     }
 
     private func updateRecentProjects() {

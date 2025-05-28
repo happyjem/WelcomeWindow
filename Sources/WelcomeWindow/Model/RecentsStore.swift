@@ -14,7 +14,7 @@ public enum RecentsStore {
     private static let bookmarksKey = "recentProjectBookmarks"
 
     /// Notification sent when the recent projects list is updated.
-    public static let didUpdateNotification = Notification.Name("RecentProjectsStore.didUpdate")
+    public static let didUpdateNotification = Notification.Name("RecentsStore.didUpdate")
 
     /// Internal representation of a bookmark entry.
     private struct BookmarkEntry: Codable, Equatable {
