@@ -9,7 +9,7 @@ import SwiftUI
 import AppKit
 import Foundation
 
-public struct WelcomeView<Content: View>: View {
+public struct WelcomeView: View {
 
     @Environment(\.colorScheme)
     private var colorScheme
@@ -18,22 +18,17 @@ public struct WelcomeView<Content: View>: View {
     private var controlActiveState
 
     @State private var isHoveringCloseButton = false
-
-    private let dismissWindow: () -> Void
-    private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
-
-    private let viewCount: Int
-
     @FocusState private var isFocused: Bool
 
-    public init(
+    private let dismissWindow: () -> Void
+    private let actions: WelcomeActions
+
+    init(
         dismissWindow: @escaping () -> Void,
-        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content,
-        viewCount: Int = 0
+        actions: WelcomeActions
     ) {
         self.dismissWindow = dismissWindow
-        self.contentBuilder = content
-        self.viewCount = viewCount
+        self.actions = actions
     }
 
     private var appVersion: String { Bundle.versionString ?? "" }
@@ -114,16 +109,28 @@ public struct WelcomeView<Content: View>: View {
 
             HStack {
                 VStack(alignment: .leading, spacing: 8) {
-                    if viewCount < 3 {
+                    // UNPACKING HERE
+                    switch actions {
+                    case .none:
+                        EmptyView()
+                    case .one(let v1):
                         Spacer()
-                    }
-                    contentBuilder(dismissWindow)
-                    if viewCount < 3 {
+                        v1
                         Spacer()
+                    case .two(let v1, let v2):
+                        Spacer()
+                        v1
+                        v2
+                        Spacer()
+                    case .three(let v1, let v2, let v3):
+                        v1
+                        v2
+                        v3
                     }
                 }
                 .focusSection()
             }
+
             Spacer()
         }
         .padding(.top, 20)
@@ -139,7 +146,6 @@ public struct WelcomeView<Content: View>: View {
                 Color(.white)
                     .background(.regularMaterial)
             }
-
         }
     }
 
@@ -169,6 +175,3 @@ public struct WelcomeView<Content: View>: View {
         .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
     }
 }
-
-
-

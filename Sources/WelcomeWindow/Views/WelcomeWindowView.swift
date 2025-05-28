@@ -8,26 +8,22 @@
 import SwiftUI
 import AppKit
 
-public struct WelcomeWindowView<Content: View, RecentsView: View>: View {
+public struct WelcomeWindowView<RecentsView: View>: View {
 
     @Environment(\.dismiss)
     private var dismissWindow
 
-    private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
+    private let actions: WelcomeActions
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
     private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
 
-    private let viewCount: Int
-
-    public init(
-        @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content,
+    init(
+        actions: WelcomeActions,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
-        viewCount: Int = 0,
         customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil
     ) {
-        self.contentBuilder = content
+        self.actions = actions
         self.onDrop = onDrop
-        self.viewCount = viewCount
         self.customRecentsList = customRecentsList
     }
 
@@ -35,8 +31,7 @@ public struct WelcomeWindowView<Content: View, RecentsView: View>: View {
         HStack(spacing: 0) {
             WelcomeView(
                 dismissWindow: dismissWindow.callAsFunction,
-                content: contentBuilder,
-                viewCount: viewCount
+                actions: actions
             )
 
             if let customList = customRecentsList {

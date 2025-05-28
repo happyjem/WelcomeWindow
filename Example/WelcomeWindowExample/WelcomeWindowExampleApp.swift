@@ -16,39 +16,39 @@ struct WelcomeWindowExampleApp: App {
     
     var body: some Scene {
         Group {
-            WelcomeWindow(
-                content: { dismiss in
-                    ( WelcomeActionView(
-                        iconName: "circle.fill",
-                        title: "New Text Document",
-                        action: { NSDocumentController.shared.createNewDocumentWithDialog(
-                            configuration: .init(title: "Create new text document"),
-                            onCompletion: { dismiss() }
-                        )
-                            
-                        }
-                    ),
-                      WelcomeActionView(
-                        iconName: "triangle.fill",
-                        title: "Open Text Document or Folder",
-                        action: {
-                            NSDocumentController.shared.openDocumentWithDialog(
-                                configuration: .init(canChooseDirectories: true),
-                                onDialogPresented: { dismiss() },
-                                onCancel: { openWindow(id: "welcome") }
+                WelcomeWindow(
+                    actions: {
+                        WelcomeActionView(
+                            iconName: "circle.fill",
+                            title: "New Text Document",
+                            action: { NSDocumentController.shared.createNewDocumentWithDialog(
+                                configuration: .init(title: "Create new text document"),
+                                onCompletion: {  }
                             )
-                        }
-                      )
-                    )
-                },
-                onDrop: { url, dismiss in
-                    print("File dropped at: \(url.path)")
+                                
+                            }
+                        )
+                          WelcomeActionView(
+                            iconName: "triangle.fill",
+                            title: "Open Text Document or Folder",
+                            action: {
+                                NSDocumentController.shared.openDocumentWithDialog(
+                                    configuration: .init(canChooseDirectories: true),
+                                    onDialogPresented: {  },
+                                    onCancel: { openWindow(id: "welcome") }
+                                )
+                            }
+                          )
+                        
+                    },
+                    onDrop: { url, dismiss in
+                        print("File dropped at: \(url.path)")
 
-                    Task {
-                        NSDocumentController.shared.openDocument(at: url, onCompletion: { dismiss() })
+                        Task {
+                            NSDocumentController.shared.openDocument(at: url, onCompletion: { dismiss() })
+                        }
                     }
-                }
-            )
+                )
         }
     }
 }
