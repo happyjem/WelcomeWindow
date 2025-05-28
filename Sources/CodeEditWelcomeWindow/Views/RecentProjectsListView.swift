@@ -59,13 +59,8 @@ public struct RecentProjectsListView: View {
             }
         } primaryAction: { items in
             for url in items {
-                guard RecentProjectsStore.beginAccessing(url) else {
-                    print("❌ Could not access recent project (security scope failure): \(url.path)")
-                    continue
-                }
 
                 NSDocumentController.shared.openDocument(at: url) {
-                    RecentProjectsStore.endAccessing(url)
                     dismissWindow()
                 }
             }

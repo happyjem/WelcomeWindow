@@ -30,15 +30,3 @@ final class TXTDocument: NSDocument, ObservableObject {
         addWindowController(NSWindowController(window: window))
     }
 }
-
-// MARK: - SwiftUI wrapper -----------------------------------------------------
-
-struct TXTEditorView: View {
-    @ObservedObject var document: TXTDocument           // keeps view in sync
-
-    var body: some View {
-        TextEditor(text: $document.text)                // <-- binding works
-            .font(.system(.body, design: .monospaced))
-            .padding()
-    }
-}

@@ -10,10 +10,9 @@ import CodeEditWelcomeWindow
 
 @main
 struct CodeEditWelcomeWindowExampleApp: App {
-
+    
     @Environment(\.openWindow) private var openWindow
-    private let handler = TXTDocumentController.shared
-
+    
     var body: some Scene {
         Group {
             WelcomeWindow(
@@ -21,38 +20,34 @@ struct CodeEditWelcomeWindowExampleApp: App {
                     ( WelcomeActionView(
                         iconName: "circle.fill",
                         title: "New Text Document",
-                        action: { handler.createNewDocumentWithDialog(
+                        action: { NSDocumentController.shared.createNewDocumentWithDialog(
                             configuration: .init(title: "Create new text document"),
                             onCompletion: { dismiss() }
                         )
                             
                         }
                     ),
-//                      WelcomeActionView(
-//                        iconName: "square.fill",
-//                        title: "Git Clone Text Document",
-//                        action: { print("Show some git clone UI") }
-//                      ),
                       WelcomeActionView(
                         iconName: "triangle.fill",
                         title: "Open Text Document",
                         action: {
-                            handler.openDocumentWithDialog(
+                            NSDocumentController.shared.openDocumentWithDialog(
+                                configuration: .init(canChooseDirectories: true),
                                 onDialogPresented: { dismiss() },
                                 onCancel: { openWindow(id: "welcome") }
                             )
                         }
                       )
-                )
+                    )
                 },
                 onDrop: { url, dismiss in
                     print("File dropped at: \(url.path)")
                     
                     Task {
-                        handler.openDocument(at: url, onCompletion: { dismiss() })
+                        NSDocumentController.shared.openDocument(at: url, onCompletion: { dismiss() })
                     }
                 }
-
+                
             )
         }
     }

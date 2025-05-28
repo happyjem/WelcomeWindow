@@ -56,18 +56,22 @@ extension NSDocumentController {
         let panel = NSOpenPanel()
         panel.title = configuration.title
         panel.canChooseFiles = true
-        panel.canChooseDirectories = false
+        panel.canChooseDirectories = configuration.canChooseDirectories
         panel.allowedContentTypes = configuration.allowedContentTypes
         panel.directoryURL = configuration.directoryURL
 
+ 
+       
         onDialogPresented()
-
-
+  
+  
         let result = panel.runModal()
         guard result == .OK, let selectedURL = panel.url else {
             onCancel()
             return
         }
+        
+ 
 
         self.openDocument(at: selectedURL, onCompletion: onCompletion, onError: { _ in onCancel() })
     }
@@ -79,6 +83,8 @@ extension NSDocumentController {
         onCompletion: @escaping () -> Void,
         onError: @escaping (Error) -> Void = { _ in }
     ) {
+        
+        let accessed = RecentProjectsStore.beginAccessing(url)
         openDocument(withContentsOf: url, display: true) { _, _, error in
             if let error {
                 NSAlert(error: error).runModal()

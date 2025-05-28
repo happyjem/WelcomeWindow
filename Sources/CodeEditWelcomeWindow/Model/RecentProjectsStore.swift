@@ -33,12 +33,16 @@ enum RecentProjectsStore {
 
     /// Return all recent project URLs (resolved from bookmarks).
     static func recentProjectURLs() -> [URL] {
-        loadBookmarks()
-            .compactMap { entry in
-                guard let resolved = entry.url else { return nil }
-                return resolved
-            }
+        var seen = Set<String>()
+        return loadBookmarks().compactMap { entry in
+            guard let resolved = entry.url else { return nil }
+            let path = resolved.standardized.path
+            guard !seen.contains(path) else { return nil }
+            seen.insert(path)
+            return resolved
+        }
     }
+
 
     /// Notify the store that a project was opened.
     /// Saves its bookmark and moves it to the front.
@@ -51,9 +55,10 @@ enum RecentProjectsStore {
             )
             var bookmarks = loadBookmarks()
 
-            // Remove duplicates
-            bookmarks.removeAll(where: { $0.urlPath == url.path })
-            bookmarks.insert(BookmarkEntry(urlPath: url.path, bookmarkData: bookmark), at: 0)
+            let standardizedPath = url.standardized.path
+            bookmarks.removeAll(where: { $0.urlPath == standardizedPath })
+            bookmarks.insert(BookmarkEntry(urlPath: standardizedPath, bookmarkData: bookmark), at: 0)
+
 
             saveBookmarks(Array(bookmarks.prefix(100)))
         } catch {
