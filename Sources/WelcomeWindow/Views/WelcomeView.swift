@@ -18,6 +18,8 @@ public struct WelcomeView: View {
     private var controlActiveState
 
     @State private var isHoveringCloseButton = false
+    @State private var appIconAverageColor: Color = .accentColor
+
     @FocusState.Binding var focusedField: FocusTarget?
 
     private let dismissWindow: () -> Void
@@ -85,7 +87,7 @@ public struct WelcomeView: View {
                 if colorScheme == .dark {
                     Rectangle()
                         .frame(width: 104, height: 104)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(appIconAverageColor)
                         .clipShape(RoundedRectangle(cornerRadius: 24))
                         .blur(radius: 64)
                         .opacity(0.5)
@@ -157,6 +159,12 @@ public struct WelcomeView: View {
             } else {
                 Color(.white)
                     .background(.regularMaterial)
+            }
+        }
+        .onAppear {
+            if let averageNSColor = NSApp.applicationIconImage.dominantColor() {
+                appIconAverageColor = Color(averageNSColor)
+                print(Color(averageNSColor).description)
             }
         }
     }
