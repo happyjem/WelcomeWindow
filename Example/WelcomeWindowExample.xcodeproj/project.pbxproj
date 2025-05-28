@@ -15,9 +15,22 @@
 		5ED3B5B22DE747D400F6DB0B /* WelcomeWindow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WelcomeWindow; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5ED3BBA12DE7ACE900F6DB0B /* Exceptions for "WelcomeWindowExample" folder in "WelcomeWindowExample" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5ED3AEF92DE72A2800F6DB0B /* WelcomeWindowExample */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5ED3AEFC2DE72A2800F6DB0B /* WelcomeWindowExample */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5ED3BBA12DE7ACE900F6DB0B /* Exceptions for "WelcomeWindowExample" folder in "WelcomeWindowExample" target */,
+			);
 			path = WelcomeWindowExample;
 			sourceTree = "<group>";
 		};

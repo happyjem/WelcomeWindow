@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 final class FolderDocument: NSDocument, ObservableObject {
     @Published var folderURL: URL?
@@ -28,5 +29,9 @@ final class FolderDocument: NSDocument, ObservableObject {
     // Override save to disable it or handle custom folder-based saving
     override func data(ofType typeName: String) throws -> Data {
         Data()
+    }
+    
+    override class var readableTypes: [String] {
+        return [UTType.folder.identifier]
     }
 }

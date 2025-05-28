@@ -15,7 +15,7 @@ public struct WelcomeWindowView<RecentsView: View>: View {
     @FocusState private var focusedField: FocusTarget?
 
     @State private var eventMonitor: Any?
-    @State private var recentProjects: [URL] = RecentProjectsStore.recentProjectURLs()
+    @State private var recentProjects: [URL] = RecentsStore.recentProjectURLs()
     @State private var selection: Set<URL> = []
     @State private var actionCount: Int = 0
 
@@ -47,7 +47,7 @@ public struct WelcomeWindowView<RecentsView: View>: View {
             if let customList = customRecentsList {
                 customList(dismiss)
             } else {
-                RecentProjectsListView(
+                RecentsListView(
                     recentProjects: $recentProjects,
                     selection: $selection,
                     focusedField: $focusedField,
@@ -109,6 +109,13 @@ public struct WelcomeWindowView<RecentsView: View>: View {
     // MARK: - Keyboard Handling
 
     private func handleKeyDown(_ event: NSEvent) -> NSEvent? {
+
+        // cmd+W
+        if event.modifierFlags.contains(.command), event.keyCode == 13 {
+            dismissWindow()
+            return nil
+        }
+
         switch event.keyCode {
         case 126: // Arrow Up
             if focusedField == .recentProjects {

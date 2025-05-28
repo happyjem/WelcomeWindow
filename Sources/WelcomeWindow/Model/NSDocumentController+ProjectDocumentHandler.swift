@@ -97,15 +97,15 @@ extension NSDocumentController {
         onCompletion: @escaping () -> Void,
         onError: @escaping (Error) -> Void = { _ in }
     ) {
-        _ = RecentProjectsStore.beginAccessing(url)
+        _ = RecentsStore.beginAccessing(url)
         openDocument(withContentsOf: url, display: true) { _, _, error in
             if let error {
                 NSAlert(error: error).runModal()
                 onError(error)
             } else {
                 // Log to recent projects
-                RecentProjectsStore.documentOpened(at: url)
                 NSApp.activate(ignoringOtherApps: true)
+                RecentsStore.documentOpened(at: url)
                 onCompletion()
             }
         }

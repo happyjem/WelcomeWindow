@@ -10,10 +10,10 @@ import WelcomeWindow
 
 @main
 struct WelcomeWindowExampleApp: App {
-    
+
     @Environment(\.openWindow)
     private var openWindow
-    
+
     var body: some Scene {
         Group {
             WelcomeWindow(
@@ -25,7 +25,6 @@ struct WelcomeWindowExampleApp: App {
                             configuration: .init(title: "Create new text document"),
                             onCompletion: { dismiss() }
                         )
-                            
                         }
                     )
                     WelcomeActionView(
@@ -39,8 +38,6 @@ struct WelcomeWindowExampleApp: App {
                             )
                         }
                     )
-                    
-                    
                 },
                 onDrop: { url, dismiss in
                     print("File dropped at: \(url.path)")

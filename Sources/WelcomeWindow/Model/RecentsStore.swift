@@ -8,7 +8,7 @@
 import AppKit
 
 /// A utility store for managing recent project file access using security-scoped bookmarks.
-public enum RecentProjectsStore {
+public enum RecentsStore {
 
     /// The UserDefaults key for storing recent project bookmarks.
     private static let bookmarksKey = "recentProjectBookmarks"

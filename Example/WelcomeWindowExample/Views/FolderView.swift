@@ -24,6 +24,5 @@ struct FolderView: View {
             }
         }
         .frame(minWidth: 600, minHeight: 400)
-       
     }
 }

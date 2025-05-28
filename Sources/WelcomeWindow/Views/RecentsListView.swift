@@ -9,7 +9,7 @@ import SwiftUI
 import CoreSpotlight
 import AppKit
 
-public struct RecentProjectsListView: View {
+public struct RecentsListView: View {
 
     @Environment(\.colorScheme)
     private var colorScheme
@@ -48,7 +48,7 @@ public struct RecentProjectsListView: View {
 
     public var body: some View {
         List(recentProjects, id: \.self, selection: $selection) { project in
-            RecentProjectListItem(projectPath: project)
+            RecentsListItem(projectPath: project)
         }
         .focused($focusedField, equals: .recentProjects)
         .listStyle(.sidebar)
@@ -107,7 +107,7 @@ public struct RecentProjectsListView: View {
                 listEmptyView
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: RecentProjectsStore.didUpdateNotification)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: RecentsStore.didUpdateNotification)) { _ in
             updateRecentProjects()
         }
     }
@@ -115,11 +115,11 @@ public struct RecentProjectsListView: View {
     // MARK: - Actions
 
     private func removeRecentProjects() {
-        recentProjects = RecentProjectsStore.removeRecentProjects(selection)
+        recentProjects = RecentsStore.removeRecentProjects(selection)
     }
 
     private func updateRecentProjects() {
-        recentProjects = RecentProjectsStore.recentProjectURLs()
+        recentProjects = RecentsStore.recentProjectURLs()
         if !recentProjects.isEmpty {
             selection = Set(recentProjects.prefix(1))
         }
