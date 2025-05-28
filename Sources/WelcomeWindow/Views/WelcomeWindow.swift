@@ -97,6 +97,37 @@ public struct WelcomeWindow<CustomRecentsListView: View>: Scene {
     }
 
     public var body: some Scene {
+        #if swift(>=5.9)
+        if #available(macOS 15, *) {
+            return Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
+                ContentView(
+                    content: contentBuilder,
+                    onDrop: onDrop,
+                    customRecentsList: customRecentsList,
+                    viewCount: viewCount
+                )
+                .frame(width: 740, height: 460)
+                .task {
+                    if let window = NSApp.findWindow(DefaultSceneID.welcome) {
+                        window.standardWindowButton(.closeButton)?.isHidden = true
+                        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+                        window.standardWindowButton(.zoomButton)?.isHidden = true
+                        window.isMovableByWindowBackground = true
+                    }
+                }
+            }
+            .windowStyle(.plain)
+            .windowResizability(.contentSize)
+            .defaultLaunchBehavior(.presented)
+        } else {
+            return legacyWindow
+        }
+        #else
+        return legacyWindow
+        #endif
+    }
+
+    private var legacyWindow: some Scene {
         Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
             ContentView(
                 content: contentBuilder,
@@ -111,7 +142,6 @@ public struct WelcomeWindow<CustomRecentsListView: View>: Scene {
                     window.standardWindowButton(.closeButton)?.isHidden = true
                     window.standardWindowButton(.miniaturizeButton)?.isHidden = true
                     window.standardWindowButton(.zoomButton)?.isHidden = true
-                    window.backingType = .buffered
                     window.backgroundColor = .clear
                     window.isMovableByWindowBackground = true
                 }
@@ -120,6 +150,7 @@ public struct WelcomeWindow<CustomRecentsListView: View>: Scene {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
     }
+
 
     private struct ContentView: View {
         let content: (_ dismissWindow: @escaping () -> Void) -> AnyView

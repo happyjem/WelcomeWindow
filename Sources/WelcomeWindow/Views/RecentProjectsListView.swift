@@ -10,11 +10,13 @@ import CoreSpotlight
 import AppKit
 
 public struct RecentProjectsListView: View {
-    
-    
+
     @Environment(\.colorScheme) private var colorScheme
+    @FocusState private var isFocused: Bool
+
     @State private var selection: Set<URL>
     @State private var recentProjects: [URL]
+    @State private var eventMonitor: Any?
 
     private let dismissWindow: () -> Void
 
@@ -39,6 +41,7 @@ public struct RecentProjectsListView: View {
         List(recentProjects, id: \.self, selection: $selection) { project in
             RecentProjectListItem(projectPath: project)
         }
+        .focused($isFocused)
         .listStyle(.sidebar)
         .scrollContentBackground(.hidden)
         .contextMenu(forSelectionType: URL.self) { items in
@@ -59,7 +62,6 @@ public struct RecentProjectsListView: View {
             }
         } primaryAction: { items in
             for url in items {
-
                 NSDocumentController.shared.openDocument(at: url) {
                     dismissWindow()
                 }
@@ -99,7 +101,24 @@ public struct RecentProjectsListView: View {
         .onReceive(NotificationCenter.default.publisher(for: RecentProjectsStore.didUpdateNotification)) { _ in
             updateRecentProjects()
         }
+        .onAppear {
+            isFocused = true
+            self.eventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { event in
+                switch event.keyCode {
+                case 126: // up arrow
+                    return handleArrowUpKeyPressed() == .handled ? nil : event
+                case 125: // down arrow
+                    return handleArrowDownKeyPressed() == .handled ? nil : event
+                case 36, 76: // return/enter
+                    return handleReturnKeyPressed() == .handled ? nil : event
+                default:
+                    return event
+                }
+            }
+        }
     }
+
+    // MARK: - Actions
 
     private func removeRecentProjects() {
         recentProjects = RecentProjectsStore.removeRecentProjects(selection)
@@ -107,5 +126,55 @@ public struct RecentProjectsListView: View {
 
     private func updateRecentProjects() {
         recentProjects = RecentProjectsStore.recentProjectURLs()
+        if !recentProjects.isEmpty {
+            selection = Set(recentProjects.prefix(1))
+        }
+    }
+
+    // MARK: - Key Handling
+
+    private enum KeyHandlingResult {
+        case handled
+        case notHandled
+    }
+
+    @discardableResult
+    private func handleArrowUpKeyPressed() -> KeyHandlingResult {
+        guard let current = currentSelectedIndex() else {
+            selection = Set(recentProjects.suffix(1))
+            return .handled
+        }
+        if current > 0 {
+            selection = [recentProjects[current - 1]]
+            return .handled
+        }
+        return .handled
+    }
+
+    @discardableResult
+    private func handleArrowDownKeyPressed() -> KeyHandlingResult {
+        guard let current = currentSelectedIndex() else {
+            selection = Set(recentProjects.prefix(1))
+            return .handled
+        }
+        if current < recentProjects.count - 1 {
+            selection = [recentProjects[current + 1]]
+            return .handled
+        }
+        return .handled
+    }
+
+    @discardableResult
+    private func handleReturnKeyPressed() -> KeyHandlingResult {
+        guard let selected = selection.first else { return .notHandled }
+        NSDocumentController.shared.openDocument(at: selected) {
+            dismissWindow()
+        }
+        return .handled
+    }
+
+    private func currentSelectedIndex() -> Int? {
+        guard let selected = selection.first else { return nil }
+        return recentProjects.firstIndex(of: selected)
     }
 }
