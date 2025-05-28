@@ -120,16 +120,13 @@ public struct WelcomeView: View {
                         Spacer()
                         view1
                             .focused($focusedField, equals: .action1)
-                            .contentShape(Rectangle())
                         Spacer()
                     case let .two(view1, view2):
                         Spacer()
                         view1
                             .focused($focusedField, equals: .action1)
-                            .contentShape(Rectangle())
                         view2
                             .focused($focusedField, equals: .action2)
-                            .contentShape(Rectangle())
                         Spacer()
                     case let .three(view1, view2, view3):
                         view1
