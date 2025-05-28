@@ -21,10 +21,11 @@ struct WelcomeWindowExampleApp: App {
                     WelcomeActionView(
                         iconName: "circle.fill",
                         title: "New Text Document",
-                        action: { NSDocumentController.shared.createNewDocumentWithDialog(
-                            configuration: .init(title: "Create new text document"),
-                            onCompletion: { dismiss() }
-                        )
+                        action: {
+                            NSDocumentController.shared.createNewDocumentWithDialog(
+                                configuration: .init(title: "Create new text document"),
+                                onCompletion: { dismiss() }
+                            )
                         }
                     )
                     WelcomeActionView(

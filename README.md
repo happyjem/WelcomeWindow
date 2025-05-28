@@ -37,31 +37,33 @@ To use `WelcomeWindow`, simply add it to your app.
 ```swift
 WelcomeWindow(
     actions: { dismiss in
-        (
-            WelcomeActionView(
-                iconName: "circle.fill",
-                title: "New Text Document",
-                action: {
-                    handler.createNewDocumentWithDialog(
-                        configuration: .init(title: "Create new text document"),
-                        onCompletion: { dismiss() }
-                    )
-                }
-            ),
-            WelcomeActionView(
-                iconName: "triangle.fill",
-                title: "Open Text Document",
-                action: {
-                    handler.openDocumentWithDialog(
-                        onCancel: { openWindow(id: "welcome") }
-                    )
-                }
-            )
+        WelcomeActionView(
+            iconName: "circle.fill",
+            title: "New Text Document",
+            action: {
+                NSDocumentController.shared.createNewDocumentWithDialog(
+                    configuration: .init(title: "Create new text document"),
+                    onCompletion: { dismiss() }
+                )
+            }
+        )
+        WelcomeActionView(
+            iconName: "triangle.fill",
+            title: "Open Text Document or Folder",
+            action: {
+                NSDocumentController.shared.openDocumentWithDialog(
+                    configuration: .init(canChooseDirectories: true),
+                    onDialogPresented: { dismiss() },
+                    onCancel: { openWindow(id: "welcome") }
+                )
+            }
         )
     },
     onDrop: { url, dismiss in
+        print("File dropped at: \(url.path)")
+        
         Task {
-            handler.openDocument(at: url, onCompletion: { dismiss() })
+            NSDocumentController.shared.openDocument(at: url, onCompletion: { dismiss() })
         }
     }
 )
