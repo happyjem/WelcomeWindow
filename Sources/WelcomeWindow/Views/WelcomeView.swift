@@ -24,11 +24,11 @@ public struct WelcomeView: View {
     private let actions: WelcomeActions
 
     init(
-        dismissWindow: @escaping () -> Void,
-        actions: WelcomeActions
+        actions: WelcomeActions,
+        dismissWindow: @escaping () -> Void
     ) {
-        self.dismissWindow = dismissWindow
         self.actions = actions
+        self.dismissWindow = dismissWindow
     }
 
     private var appVersion: String { Bundle.versionString ?? "" }
@@ -109,26 +109,24 @@ public struct WelcomeView: View {
 
             HStack {
                 VStack(alignment: .leading, spacing: 8) {
-                    // UNPACKING HERE
                     switch actions {
                     case .none:
                         EmptyView()
-                    case .one(let v1):
+                    case .one(let view1):
                         Spacer()
-                        v1
+                        view1
                         Spacer()
-                    case .two(let v1, let v2):
+                    case let .two(view1, view2):
                         Spacer()
-                        v1
-                        v2
+                        view1
+                        view2
                         Spacer()
-                    case .three(let v1, let v2, let v3):
-                        v1
-                        v2
-                        v3
+                    case let .three(view1, view2, view3):
+                        view1
+                        view2
+                        view3
                     }
                 }
-                .focusSection()
             }
 
             Spacer()

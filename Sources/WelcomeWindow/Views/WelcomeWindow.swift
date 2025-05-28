@@ -10,17 +10,16 @@ import SwiftUI
 /// A customizable welcome window scene supporting up to three content views
 /// and an optional custom recent projects list.
 public struct WelcomeWindow<RecentsView: View>: Scene {
-
-    private let actions: WelcomeActions
+    private let buildActions: (_ dismissWindow: @escaping () -> Void) -> WelcomeActions
     private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
 
     public init(
-        @ActionsBuilder actions: () -> WelcomeActions,
+        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
     ) {
-        self.actions = actions()
+        self.buildActions = actions
         self.customRecentsList = customRecentsList
         self.onDrop = onDrop
     }
@@ -30,7 +29,7 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
         if #available(macOS 15, *) {
             return Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
                 WelcomeWindowView(
-                    actions: actions,
+                    buildActions: buildActions,
                     onDrop: onDrop,
                     customRecentsList: customRecentsList
                 )
@@ -59,7 +58,7 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
     private var legacyWindow: some Scene {
         Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
             WelcomeWindowView(
-                actions: actions,
+                buildActions: buildActions,
                 onDrop: onDrop,
                 customRecentsList: customRecentsList
             )
@@ -82,9 +81,13 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
 
 extension WelcomeWindow where RecentsView == EmptyView {
     public init(
-        @ActionsBuilder actions: () -> WelcomeActions,
-        onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
+        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
+        onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
     ) {
-        self.init(actions: actions, customRecentsList: nil, onDrop: onDrop)
+        self.init(
+            actions: actions,
+            customRecentsList: nil,
+            onDrop: onDrop
+        )
     }
 }
