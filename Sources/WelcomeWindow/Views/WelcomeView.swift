@@ -18,17 +18,19 @@ public struct WelcomeView: View {
     private var controlActiveState
 
     @State private var isHoveringCloseButton = false
-    @FocusState private var isFocused: Bool
+    @FocusState.Binding var focusedField: FocusTarget?
 
     private let dismissWindow: () -> Void
     private let actions: WelcomeActions
 
-    init(
+    public init(
         actions: WelcomeActions,
-        dismissWindow: @escaping () -> Void
+        dismissWindow: @escaping () -> Void,
+        focusedField: FocusState<FocusTarget?>.Binding
     ) {
         self.actions = actions
         self.dismissWindow = dismissWindow
+        self._focusedField = focusedField
     }
 
     private var appVersion: String { Bundle.versionString ?? "" }
@@ -92,8 +94,10 @@ public struct WelcomeView: View {
                     .resizable()
                     .frame(width: 128, height: 128)
             }
+
             Text(Bundle.displayName)
                 .font(.system(size: 36, weight: .bold))
+
             Text(String(
                 format: NSLocalizedString("Version %@%@ (%@)", comment: ""),
                 appVersion, appVersionPostfix, appBuild
@@ -115,17 +119,30 @@ public struct WelcomeView: View {
                     case .one(let view1):
                         Spacer()
                         view1
+                            .focused($focusedField, equals: .action1)
+                            .contentShape(Rectangle())
                         Spacer()
                     case let .two(view1, view2):
                         Spacer()
                         view1
+                            .focused($focusedField, equals: .action1)
+                            .contentShape(Rectangle())
                         view2
+                            .focused($focusedField, equals: .action2)
+                            .contentShape(Rectangle())
                         Spacer()
                     case let .three(view1, view2, view3):
                         view1
+                            .focused($focusedField, equals: .action1)
+                            .contentShape(Rectangle())
                         view2
+                            .focused($focusedField, equals: .action2)
+                            .contentShape(Rectangle())
                         view3
+                            .focused($focusedField, equals: .action3)
+                            .contentShape(Rectangle())
                     }
+
                 }
             }
 
@@ -137,7 +154,7 @@ public struct WelcomeView: View {
         .frame(width: 460)
         .frame(maxHeight: .infinity)
         .background {
-            if self.colorScheme == .dark {
+            if colorScheme == .dark {
                 Color(.black).opacity(0.275)
                     .background(.ultraThickMaterial)
             } else {
@@ -148,28 +165,20 @@ public struct WelcomeView: View {
     }
 
     private var dismissButton: some View {
-        Button(
-            action: dismissWindow,
-            label: {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(isHoveringCloseButton ? Color(.secondaryLabelColor) : Color(.tertiaryLabelColor))
-            }
-        )
+        Button(action: dismissWindow) {
+            Image(systemName: "xmark.circle.fill")
+                .foregroundColor(isHoveringCloseButton ? Color(.secondaryLabelColor) : Color(.tertiaryLabelColor))
+        }
         .buttonStyle(.plain)
         .accessibilityLabel(Text("Close"))
-        .focused($isFocused)
-        .modifier(FocusRingModifier(isFocused: isFocused, shape: .circle))
-        .onAppear {
-            DispatchQueue.main.async {
-                isFocused = false
-            }
-        }
+        .focused($focusedField, equals: .dismissButton)
+        .modifier(FocusRingModifier(isFocused: focusedField == .dismissButton, shape: .circle))
         .onHover { hover in
             withAnimation(.linear(duration: 0.15)) {
                 isHoveringCloseButton = hover
             }
         }
         .padding(10)
-        .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+        .transition(.opacity.animation(.easeInOut(duration: 0.25)))
     }
 }

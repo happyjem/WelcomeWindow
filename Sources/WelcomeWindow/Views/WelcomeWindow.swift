@@ -80,6 +80,10 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
 }
 
 extension WelcomeWindow where RecentsView == EmptyView {
+    /// Creates a welcome window without a custom recent projects list.
+    /// - Parameters:
+    ///   - actions: A result builder closure that defines up to three SwiftUI action views.
+    ///   - onDrop: An optional closure that handles dropped URLs.
     public init(
         @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil

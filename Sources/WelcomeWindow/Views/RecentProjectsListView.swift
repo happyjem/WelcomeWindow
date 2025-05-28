@@ -14,19 +14,26 @@ public struct RecentProjectsListView: View {
     @Environment(\.colorScheme)
     private var colorScheme
 
-    @FocusState private var isFocused: Bool
+    @Binding private var recentProjects: [URL]
+    @Binding private var selection: Set<URL>
 
-    @State private var selection: Set<URL>
-    @State private var recentProjects: [URL]
-    @State private var eventMonitor: Any?
-
+    @FocusState.Binding private var focusedField: FocusTarget?
     private let dismissWindow: () -> Void
 
-    public init(dismissWindow: @escaping () -> Void) {
+    public init(
+        recentProjects: Binding<[URL]>,
+        selection: Binding<Set<URL>>,
+        focusedField: FocusState<FocusTarget?>.Binding,
+        dismissWindow: @escaping () -> Void
+    ) {
+        self._recentProjects = recentProjects
+        self._selection = selection
+        self._focusedField = focusedField
         self.dismissWindow = dismissWindow
-        let urls = RecentProjectsStore.recentProjectURLs()
-        self._recentProjects = State(initialValue: urls)
-        self._selection = State(initialValue: Set(urls.prefix(1)))
+    }
+
+    private var isFocused: Bool {
+        focusedField == .recentProjects
     }
 
     private var listEmptyView: some View {
@@ -43,7 +50,7 @@ public struct RecentProjectsListView: View {
         List(recentProjects, id: \.self, selection: $selection) { project in
             RecentProjectListItem(projectPath: project)
         }
-        .focused($isFocused)
+        .focused($focusedField, equals: .recentProjects)
         .listStyle(.sidebar)
         .scrollContentBackground(.hidden)
         .contextMenu(forSelectionType: URL.self) { items in
@@ -76,7 +83,7 @@ public struct RecentProjectsListView: View {
             removeRecentProjects()
         }
         .background {
-            if self.colorScheme == .dark {
+            if colorScheme == .dark {
                 Color(.black).opacity(0.075)
                     .background(.thickMaterial)
             } else {
@@ -103,21 +110,6 @@ public struct RecentProjectsListView: View {
         .onReceive(NotificationCenter.default.publisher(for: RecentProjectsStore.didUpdateNotification)) { _ in
             updateRecentProjects()
         }
-        .onAppear {
-            isFocused = true
-            self.eventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { event in
-                switch event.keyCode {
-                case 126: // up arrow
-                    return handleArrowUpKeyPressed() == .handled ? nil : event
-                case 125: // down arrow
-                    return handleArrowDownKeyPressed() == .handled ? nil : event
-                case 36, 76: // return/enter
-                    return handleReturnKeyPressed() == .handled ? nil : event
-                default:
-                    return event
-                }
-            }
-        }
     }
 
     // MARK: - Actions
@@ -131,52 +123,5 @@ public struct RecentProjectsListView: View {
         if !recentProjects.isEmpty {
             selection = Set(recentProjects.prefix(1))
         }
-    }
-
-    // MARK: - Key Handling
-
-    private enum KeyHandlingResult {
-        case handled
-        case notHandled
-    }
-
-    @discardableResult
-    private func handleArrowUpKeyPressed() -> KeyHandlingResult {
-        guard let current = currentSelectedIndex() else {
-            selection = Set(recentProjects.suffix(1))
-            return .handled
-        }
-        if current > 0 {
-            selection = [recentProjects[current - 1]]
-            return .handled
-        }
-        return .handled
-    }
-
-    @discardableResult
-    private func handleArrowDownKeyPressed() -> KeyHandlingResult {
-        guard let current = currentSelectedIndex() else {
-            selection = Set(recentProjects.prefix(1))
-            return .handled
-        }
-        if current < recentProjects.count - 1 {
-            selection = [recentProjects[current + 1]]
-            return .handled
-        }
-        return .handled
-    }
-
-    @discardableResult
-    private func handleReturnKeyPressed() -> KeyHandlingResult {
-        guard let selected = selection.first else { return .notHandled }
-        NSDocumentController.shared.openDocument(at: selected) {
-            dismissWindow()
-        }
-        return .handled
-    }
-
-    private func currentSelectedIndex() -> Int? {
-        guard let selected = selection.first else { return nil }
-        return recentProjects.firstIndex(of: selected)
     }
 }
