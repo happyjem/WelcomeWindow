@@ -169,3 +169,6 @@ public struct WelcomeView<Content: View>: View {
         .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
     }
 }
+
+
+
