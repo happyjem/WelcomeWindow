@@ -10,8 +10,12 @@ import AppKit
 import Foundation
 
 public struct WelcomeView<Content: View>: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.controlActiveState) var controlActiveState
+
+    @Environment(\.colorScheme)
+    private var colorScheme
+
+    @Environment(\.controlActiveState)
+    private var controlActiveState
 
     @State private var isHoveringCloseButton = false
 
@@ -95,8 +99,10 @@ public struct WelcomeView<Content: View>: View {
             }
             Text(Bundle.displayName)
                 .font(.system(size: 36, weight: .bold))
-            Text(String(format: NSLocalizedString("Version %@%@ (%@)", comment: ""),
-                        appVersion, appVersionPostfix, appBuild))
+            Text(String(
+                format: NSLocalizedString("Version %@%@ (%@)", comment: ""),
+                appVersion, appVersionPostfix, appBuild
+            ))
                 .textSelection(.enabled)
                 .foregroundColor(.secondary)
                 .font(.system(size: 13.5))
@@ -163,6 +169,3 @@ public struct WelcomeView<Content: View>: View {
         .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
     }
 }
-
-
-

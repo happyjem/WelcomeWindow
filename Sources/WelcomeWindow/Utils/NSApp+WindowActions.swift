@@ -25,4 +25,3 @@ extension NSApplication {
         windows.compactMap { $0.identifier?.rawValue }
     }
 }
-

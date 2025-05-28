@@ -23,6 +23,7 @@ struct FolderView: View {
                 Text("No folder loaded")
             }
         }
-        .padding()
+        .frame(minWidth: 600, minHeight: 400)
+       
     }
 }

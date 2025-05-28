@@ -11,7 +11,8 @@ import WelcomeWindow
 @main
 struct WelcomeWindowExampleApp: App {
     
-    @Environment(\.openWindow) private var openWindow
+    @Environment(\.openWindow)
+    private var openWindow
     
     var body: some Scene {
         Group {
@@ -29,31 +30,25 @@ struct WelcomeWindowExampleApp: App {
                     ),
                       WelcomeActionView(
                         iconName: "triangle.fill",
-                        title: "Open Text Document",
+                        title: "Open Text Document or Folder",
                         action: {
-                        
-                            
-                                NSDocumentController.shared.openDocumentWithDialog(
-                                    configuration: .init(canChooseDirectories: true),
-                                    onDialogPresented: { dismiss() },
-                                    onCancel: { openWindow(id: "welcome") }
-                                )
-                    
-                    
+                            NSDocumentController.shared.openDocumentWithDialog(
+                                configuration: .init(canChooseDirectories: true),
+                                onDialogPresented: { dismiss() },
+                                onCancel: { openWindow(id: "welcome") }
+                            )
                         }
                       )
                     )
                 },
                 onDrop: { url, dismiss in
                     print("File dropped at: \(url.path)")
-                    
+
                     Task {
                         NSDocumentController.shared.openDocument(at: url, onCompletion: { dismiss() })
                     }
                 }
-                
             )
-
         }
     }
 }

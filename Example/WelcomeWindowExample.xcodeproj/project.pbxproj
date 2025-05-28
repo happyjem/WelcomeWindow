@@ -7,11 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5ED3AF472DE72A8B00F6DB0B /* WelcomeWindow in Frameworks */ = {isa = PBXBuildFile; productRef = 5ED3AF462DE72A8B00F6DB0B /* WelcomeWindow */; };
+		5ED3B5C72DE7490600F6DB0B /* WelcomeWindow in Frameworks */ = {isa = PBXBuildFile; productRef = 5ED3B5C62DE7490600F6DB0B /* WelcomeWindow */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5ED3AEFA2DE72A2800F6DB0B /* WelcomeWindowExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WelcomeWindowExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5ED3B5B22DE747D400F6DB0B /* WelcomeWindow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WelcomeWindow; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -27,7 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5ED3AF472DE72A8B00F6DB0B /* WelcomeWindow in Frameworks */,
+				5ED3B5C72DE7490600F6DB0B /* WelcomeWindow in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,6 +39,7 @@
 			isa = PBXGroup;
 			children = (
 				5ED3AEFC2DE72A2800F6DB0B /* WelcomeWindowExample */,
+				5ED3B5B12DE747D400F6DB0B /* Frameworks */,
 				5ED3AEFB2DE72A2800F6DB0B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -48,6 +50,14 @@
 				5ED3AEFA2DE72A2800F6DB0B /* WelcomeWindowExample.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		5ED3B5B12DE747D400F6DB0B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5ED3B5B22DE747D400F6DB0B /* WelcomeWindow */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -70,7 +80,7 @@
 			);
 			name = WelcomeWindowExample;
 			packageProductDependencies = (
-				5ED3AF462DE72A8B00F6DB0B /* WelcomeWindow */,
+				5ED3B5C62DE7490600F6DB0B /* WelcomeWindow */,
 			);
 			productName = WelcomeWindowExample;
 			productReference = 5ED3AEFA2DE72A2800F6DB0B /* WelcomeWindowExample.app */;
@@ -101,7 +111,7 @@
 			mainGroup = 5ED3AEF12DE72A2800F6DB0B;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				5ED3AF452DE72A8B00F6DB0B /* XCLocalSwiftPackageReference "../../WelcomeWindow" */,
+				5ED3B5C92DE74C9900F6DB0B /* XCRemoteSwiftPackageReference "SwiftLintPlugin" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5ED3AEFB2DE72A2800F6DB0B /* Products */;
@@ -339,15 +349,19 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		5ED3AF452DE72A8B00F6DB0B /* XCLocalSwiftPackageReference "../../WelcomeWindow" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../WelcomeWindow;
+/* Begin XCRemoteSwiftPackageReference section */
+		5ED3B5C92DE74C9900F6DB0B /* XCRemoteSwiftPackageReference "SwiftLintPlugin" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lukepistrol/SwiftLintPlugin";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.59.1;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		5ED3AF462DE72A8B00F6DB0B /* WelcomeWindow */ = {
+		5ED3B5C62DE7490600F6DB0B /* WelcomeWindow */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WelcomeWindow;
 		};

@@ -8,14 +8,14 @@
 import SwiftUI
 import AppKit
 
-public struct WelcomeWindowView<Content: View, CustomRecentsListView: View>: View {
+public struct WelcomeWindowView<Content: View, RecentsView: View>: View {
 
-    @Environment(\.dismiss) private var dismissWindow
+    @Environment(\.dismiss)
+    private var dismissWindow
 
     private let contentBuilder: (_ dismissWindow: @escaping () -> Void) -> Content
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
-    private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)?
-
+    private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
 
     private let viewCount: Int
 
@@ -23,14 +23,13 @@ public struct WelcomeWindowView<Content: View, CustomRecentsListView: View>: Vie
         @ViewBuilder content: @escaping (_ dismissWindow: @escaping () -> Void) -> Content,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
         viewCount: Int = 0,
-        customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> CustomRecentsListView)? = nil
+        customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil
     ) {
         self.contentBuilder = content
         self.onDrop = onDrop
         self.viewCount = viewCount
         self.customRecentsList = customRecentsList
     }
-
 
     public var body: some View {
         HStack(spacing: 0) {

@@ -4,16 +4,27 @@
 //
 //  Created by Khan Winter on 10/22/24.
 //
+
 import AppKit
 
-enum RecentProjectsStore {
-    private static let bookmarksKey = "recentProjectBookmarks"
-    static let didUpdateNotification = Notification.Name("RecentProjectsStore.didUpdate")
+/// A utility store for managing recent project file access using security-scoped bookmarks.
+public enum RecentProjectsStore {
 
+    /// The UserDefaults key for storing recent project bookmarks.
+    private static let bookmarksKey = "recentProjectBookmarks"
+
+    /// Notification sent when the recent projects list is updated.
+    public static let didUpdateNotification = Notification.Name("RecentProjectsStore.didUpdate")
+
+    /// Internal representation of a bookmark entry.
     private struct BookmarkEntry: Codable, Equatable {
+        /// The standardized file path of the bookmarked URL.
         let urlPath: String
+
+        /// The bookmark data associated with the URL.
         let bookmarkData: Data
 
+        /// Resolves and returns the `URL` from the bookmark data, or `nil` if resolution fails.
         var url: URL? {
             var isStale = false
             return try? URL(
@@ -31,8 +42,10 @@ enum RecentProjectsStore {
 
     // MARK: - Public API
 
-    /// Return all recent project URLs (resolved from bookmarks).
-    static func recentProjectURLs() -> [URL] {
+    /// Returns an array of all recent project URLs resolved from stored bookmarks.
+    ///
+    /// - Returns: An array of `URL` representing the recent projects.
+    public static func recentProjectURLs() -> [URL] {
         var seen = Set<String>()
         return loadBookmarks().compactMap { entry in
             guard let resolved = entry.url else { return nil }
@@ -43,10 +56,12 @@ enum RecentProjectsStore {
         }
     }
 
-
-    /// Notify the store that a project was opened.
-    /// Saves its bookmark and moves it to the front.
-    static func documentOpened(at url: URL) {
+    /// Notifies the store that a project was opened.
+    ///
+    /// This saves a security-scoped bookmark for the URL and moves it to the top of the recent list.
+    ///
+    /// - Parameter url: The file URL of the opened document.
+    public static func documentOpened(at url: URL) {
         do {
             let bookmark = try url.bookmarkData(
                 options: .withSecurityScope,
@@ -59,40 +74,52 @@ enum RecentProjectsStore {
             bookmarks.removeAll(where: { $0.urlPath == standardizedPath })
             bookmarks.insert(BookmarkEntry(urlPath: standardizedPath, bookmarkData: bookmark), at: 0)
 
-
             saveBookmarks(Array(bookmarks.prefix(100)))
         } catch {
             print("❌ Failed to create bookmark for recent project: \(error)")
         }
     }
 
-    /// Remove selected projects from the recent list.
-    static func removeRecentProjects(_ urlsToRemove: Set<URL>) -> [URL] {
+    /// Removes specific project URLs from the recent list.
+    ///
+    /// - Parameter urlsToRemove: A set of URLs to remove from the recent projects list.
+    /// - Returns: The updated list of recent project URLs.
+    public static func removeRecentProjects(_ urlsToRemove: Set<URL>) -> [URL] {
         var bookmarks = loadBookmarks()
-        bookmarks.removeAll(where: { entry in urlsToRemove.contains(where: { $0.path == entry.urlPath }) })
+        bookmarks.removeAll(where: { entry in
+            urlsToRemove.contains(where: { $0.path == entry.urlPath })
+        })
         saveBookmarks(bookmarks)
         return recentProjectURLs()
     }
 
-    /// Clear all stored recent projects.
-    static func clearList() {
+    /// Clears all stored recent project bookmarks.
+    public static func clearList() {
         saveBookmarks([])
     }
 
     // MARK: - Bookmark Access
 
-    /// Call this before opening a project from recent list.
-    static func beginAccessing(_ url: URL) -> Bool {
+    /// Begins accessing a security-scoped resource before opening a project.
+    ///
+    /// - Parameter url: The URL of the project to access.
+    /// - Returns: `true` if access began successfully; otherwise, `false`.
+    public static func beginAccessing(_ url: URL) -> Bool {
         url.startAccessingSecurityScopedResource()
     }
 
-    /// Call this after the project is fully opened.
-    static func endAccessing(_ url: URL) {
+    /// Ends access to a previously accessed security-scoped resource.
+    ///
+    /// - Parameter url: The URL of the project to stop accessing.
+    public static func endAccessing(_ url: URL) {
         url.stopAccessingSecurityScopedResource()
     }
 
     // MARK: - Internal
 
+    /// Loads the stored bookmarks from UserDefaults.
+    ///
+    /// - Returns: An array of `BookmarkEntry` values decoded from UserDefaults.
     private static func loadBookmarks() -> [BookmarkEntry] {
         guard let data = UserDefaults.standard.data(forKey: bookmarksKey),
               let decoded = try? PropertyListDecoder().decode([BookmarkEntry].self, from: data)
@@ -100,6 +127,9 @@ enum RecentProjectsStore {
         return decoded
     }
 
+    /// Saves an array of bookmark entries to UserDefaults and posts an update notification.
+    ///
+    /// - Parameter entries: The bookmark entries to save.
     private static func saveBookmarks(_ entries: [BookmarkEntry]) {
         guard let data = try? PropertyListEncoder().encode(entries) else { return }
         UserDefaults.standard.set(data, forKey: bookmarksKey)

@@ -11,7 +11,6 @@ public struct WelcomeActionView: View {
     var iconName: String
     var title: String
     var action: () -> Void
-    
 
     @FocusState private var isfocused: Bool
 

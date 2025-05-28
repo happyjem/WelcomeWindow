@@ -11,7 +11,9 @@ import AppKit
 
 public struct RecentProjectsListView: View {
 
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorScheme)
+    private var colorScheme
+
     @FocusState private var isFocused: Bool
 
     @State private var selection: Set<URL>
