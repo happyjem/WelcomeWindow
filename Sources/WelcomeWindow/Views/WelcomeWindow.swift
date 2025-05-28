@@ -107,7 +107,7 @@ public struct WelcomeWindow<CustomRecentsListView: View>: Scene {
             .frame(width: 740, height: 432)
             .task {
                 if let window = NSApp.findWindow(DefaultSceneID.welcome) {
-                    window.styleMask = .borderless
+                    window.styleMask.insert(.borderless)
                     window.standardWindowButton(.closeButton)?.isHidden = true
                     window.standardWindowButton(.miniaturizeButton)?.isHidden = true
                     window.standardWindowButton(.zoomButton)?.isHidden = true
