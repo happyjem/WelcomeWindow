@@ -1,5 +1,5 @@
 //
-//  NSDocumentController+ProjectDocumentHandler.swift
+//  NSDocumentController+Extensions.swift
 //  Tests
 //
 //  Created by Giorgi Tchelidze on 23.05.25.
@@ -11,16 +11,22 @@ import UniformTypeIdentifiers
 /// Utility methods for opening and saving project documents using custom dialog configurations.
 extension NSDocumentController {
 
-    /// Presents a save dialog to create a new document using the specified configuration.
+    /// Presents a save dialog to create a new document using the specified configuration and initial file content.
+    ///
+    /// This method displays an `NSSavePanel` configured by the given `DocumentSaveDialogConfiguration`.
+    /// If user completes the dialog, `defaultContentProvider` closure is called to generate the file's initial content,
+    /// which is then written to disk. The document is then opened via `NSDocumentController`.
     ///
     /// - Parameters:
-    ///   - configuration: Configuration for customizing the save panel. Defaults to a plain text.
-    ///   - onDialogPresented: Called after the dialog is presented.
+    ///   - configuration: Configuration for customizing the save panel (title, allowed UTT,, default name, etc.).
+    ///   - defaultContentProvider: A closure that returns the initial new file contents. Must return `Data`.
+    ///   - onDialogPresented: Called after the dialog is presented (on the main thread).
     ///   - onCompletion: Called if the document is successfully created and opened.
-    ///   - onCancel: Called if the user cancels or an error occurs.
+    ///   - onCancel: Called if the user cancels the dialog or an error occurs during file creation or opening.
     @MainActor
     public func createNewDocumentWithDialog(
         configuration: DocumentSaveDialogConfiguration = DocumentSaveDialogConfiguration(),
+        defaultContentProvider: () throws -> Data,
         onDialogPresented: @escaping () -> Void = {},
         onCompletion: @escaping () -> Void = {},
         onCancel: @escaping () -> Void = {}
@@ -44,12 +50,39 @@ extension NSDocumentController {
         }
 
         do {
-            try "".write(to: fileURL, atomically: true, encoding: .utf8)
+            let content = try defaultContentProvider()
+            try content.write(to: fileURL)
             self.openDocument(at: fileURL, onCompletion: onCompletion, onError: { _ in onCancel() })
         } catch {
             NSAlert(error: error).runModal()
             onCancel()
         }
+    }
+
+    /// Presents a save dialog to create a new, empty document using the specified configuration.
+    ///
+    /// This is a convenience overload of `createNewDocumentWithDialog(...)` that writes an empty file (`Data()`)
+    /// as the initial content. Use this when no initial file data is required (e.g., a blank or placeholder file).
+    ///
+    /// - Parameters:
+    ///   - configuration: Configuration for customizing the save panel (title, content types, default name, etc.).
+    ///   - onDialogPresented: Called after the dialog is presented (on the main thread).
+    ///   - onCompletion: Called if the document is successfully created and opened.
+    ///   - onCancel: Called if the user cancels the dialog or if an error occurs during file creation or opening.
+    @MainActor
+    public func createNewDocumentWithDialog(
+        configuration: DocumentSaveDialogConfiguration = DocumentSaveDialogConfiguration(),
+        onDialogPresented: @escaping () -> Void = {},
+        onCompletion: @escaping () -> Void = {},
+        onCancel: @escaping () -> Void = {}
+    ) {
+        createNewDocumentWithDialog(
+            configuration: configuration,
+            defaultContentProvider: { Data() },
+            onDialogPresented: onDialogPresented,
+            onCompletion: onCompletion,
+            onCancel: onCancel
+        )
     }
 
     /// Presents an open dialog to choose a document using the specified configuration.
@@ -94,7 +127,7 @@ extension NSDocumentController {
     @MainActor
     public func openDocument(
         at url: URL,
-        onCompletion: @escaping () -> Void,
+        onCompletion: @escaping () -> Void = {},
         onError: @escaping (Error) -> Void = { _ in }
     ) {
         let accessGranted = RecentsStore.beginAccessing(url)
