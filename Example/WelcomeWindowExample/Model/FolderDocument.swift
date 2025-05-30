@@ -11,11 +11,15 @@ import UniformTypeIdentifiers
 final class FolderDocument: NSDocument, ObservableObject {
     @Published var folderURL: URL?
 
-    override class var autosavesInPlace: Bool { false }
+    override static var autosavesInPlace: Bool { false }
 
     override func read(from url: URL, ofType typeName: String) throws {
         guard url.hasDirectoryPath else {
-            throw NSError(domain: NSCocoaErrorDomain, code: NSFileReadUnknownError, userInfo: [NSLocalizedDescriptionKey: "Not a folder"])
+            throw NSError(
+                domain: NSCocoaErrorDomain,
+                code: NSFileReadUnknownError,
+                userInfo: [NSLocalizedDescriptionKey: "Not a folder"]
+            )
         }
         folderURL = url
     }
@@ -30,8 +34,8 @@ final class FolderDocument: NSDocument, ObservableObject {
     override func data(ofType typeName: String) throws -> Data {
         Data()
     }
-    
-    override class var readableTypes: [String] {
+
+    override static var readableTypes: [String] {
         return [UTType.folder.identifier]
     }
 }

@@ -11,78 +11,129 @@ import UniformTypeIdentifiers
 /// Utility methods for opening and saving project documents using custom dialog configurations.
 extension NSDocumentController {
 
-    /// Presents a save dialog to create a new document using the specified configuration and initial file content.
-    ///
-    /// This method displays an `NSSavePanel` configured by the given `DocumentSaveDialogConfiguration`.
-    /// If user completes the dialog, `defaultContentProvider` closure is called to generate the file's initial content,
-    /// which is then written to disk. The document is then opened via `NSDocumentController`.
+    /// Displays a save dialog for **single, flat-file** document types
+    /// (e.g. `MyNote.txt`, `Foo.circuitproj`).
+    /// The selected URL is passed to `NSDocument.write(…)`, then the document
+    /// is opened via `openDocument(at:)`.
     ///
     /// - Parameters:
-    ///   - configuration: Configuration for customizing the save panel (title, allowed UTT,, default name, etc.).
-    ///   - defaultContentProvider: A closure that returns the initial new file contents. Must return `Data`.
-    ///   - onDialogPresented: Called after the dialog is presented (on the main thread).
-    ///   - onCompletion: Called if the document is successfully created and opened.
-    ///   - onCancel: Called if the user cancels the dialog or an error occurs during file creation or opening.
+    ///   - configuration:   Appearance & UTI filter for the save panel.
+    ///   - onDialogPresented: Callback fired *after* the sheet/panel is shown.
+    ///   - onCompletion:    Invoked when the document window successfully opens.
+    ///   - onCancel:        Invoked if the user cancels or an error occurs.
     @MainActor
-    public func createNewDocumentWithDialog(
-        configuration: DocumentSaveDialogConfiguration = DocumentSaveDialogConfiguration(),
-        defaultContentProvider: () throws -> Data,
+    public func createFileDocumentWithDialog(
+        configuration: DocumentSaveDialogConfiguration = .init(),
         onDialogPresented: @escaping () -> Void = {},
         onCompletion: @escaping () -> Void = {},
         onCancel: @escaping () -> Void = {}
     ) {
-        let panel = NSSavePanel()
-        panel.prompt = configuration.prompt
-        panel.nameFieldLabel = configuration.nameFieldLabel
-        panel.nameFieldStringValue = configuration.defaultFileName
-        panel.canCreateDirectories = true
-        panel.allowedContentTypes = configuration.allowedContentTypes
-        panel.title = configuration.title
-        panel.level = .modalPanel
-        panel.directoryURL = configuration.directoryURL
-
-        DispatchQueue.main.async { onDialogPresented() }
-
-        let response = panel.runModal()
-        guard response == .OK, let fileURL = panel.url else {
-            onCancel()
-            return
-        }
-
-        do {
-            let content = try defaultContentProvider()
-            try content.write(to: fileURL)
-            self.openDocument(at: fileURL, onCompletion: onCompletion, onError: { _ in onCancel() })
-        } catch {
-            NSAlert(error: error).runModal()
-            onCancel()
-        }
-    }
-
-    /// Presents a save dialog to create a new, empty document using the specified configuration.
-    ///
-    /// This is a convenience overload of `createNewDocumentWithDialog(...)` that writes an empty file (`Data()`)
-    /// as the initial content. Use this when no initial file data is required (e.g., a blank or placeholder file).
-    ///
-    /// - Parameters:
-    ///   - configuration: Configuration for customizing the save panel (title, content types, default name, etc.).
-    ///   - onDialogPresented: Called after the dialog is presented (on the main thread).
-    ///   - onCompletion: Called if the document is successfully created and opened.
-    ///   - onCancel: Called if the user cancels the dialog or if an error occurs during file creation or opening.
-    @MainActor
-    public func createNewDocumentWithDialog(
-        configuration: DocumentSaveDialogConfiguration = DocumentSaveDialogConfiguration(),
-        onDialogPresented: @escaping () -> Void = {},
-        onCompletion: @escaping () -> Void = {},
-        onCancel: @escaping () -> Void = {}
-    ) {
-        createNewDocumentWithDialog(
+        _createDocument(
+            mode: .file,
             configuration: configuration,
-            defaultContentProvider: { Data() },
             onDialogPresented: onDialogPresented,
             onCompletion: onCompletion,
             onCancel: onCancel
         )
+    }
+
+    /// Displays a save dialog that asks for a **folder name** and then
+    /// creates a *package* project inside that folder:
+    ///
+    /// ```text
+    /// <Folder>/
+    /// ├─ <Folder>.<ext>   ← primary file written by `write(…)`
+    /// └─ <assets…>
+    /// ```
+    ///
+    /// - Important: Pass a `DocumentSaveDialogConfiguration` whose
+    ///   `defaultFileType` matches the document subclass *and* whose
+    ///   `defaultFileName` is **folder‐style** (without the extension).
+    @MainActor
+    public func createFolderDocumentWithDialog(
+        configuration: DocumentSaveDialogConfiguration,
+        onDialogPresented: @escaping () -> Void = {},
+        onCompletion: @escaping () -> Void = {},
+        onCancel: @escaping () -> Void = {}
+    ) {
+        _createDocument(
+            mode: .folder,
+            configuration: configuration,
+            onDialogPresented: onDialogPresented,
+            onCompletion: onCompletion,
+            onCancel: onCancel
+        )
+    }
+
+    // MARK: - Private shared implementation
+    // ─────────────────────────────────────────────────────────────────────
+    private enum SaveMode { case file, folder }
+
+    /// Internal helper that contains 100 % of the common logic.
+    @MainActor
+    private func _createDocument(
+        mode: SaveMode,
+        configuration: DocumentSaveDialogConfiguration,
+        onDialogPresented: @escaping () -> Void,
+        onCompletion: @escaping () -> Void,
+        onCancel: @escaping () -> Void
+    ) {
+
+        // 1. Configure NSSavePanel ------------------------------------------------
+        let panel = NSSavePanel()
+        panel.prompt               = configuration.prompt
+        panel.title                = configuration.title
+        panel.nameFieldLabel       = configuration.nameFieldLabel
+        panel.canCreateDirectories = true
+        panel.directoryURL         = configuration.directoryURL
+        panel.level                = .modalPanel
+        panel.treatsFilePackagesAsDirectories = true
+
+        switch mode {
+        case .file:
+            panel.nameFieldStringValue = configuration.defaultFileName
+            panel.allowedContentTypes  = configuration.allowedContentTypes
+        case .folder:
+            panel.nameFieldStringValue =
+                URL(fileURLWithPath: configuration.defaultFileName)
+                    .deletingPathExtension().lastPathComponent
+            panel.allowedContentTypes  = []                // treat as folder
+        }
+
+        DispatchQueue.main.async { onDialogPresented() }
+        guard panel.runModal() == .OK,
+              let baseURL = panel.url else { onCancel(); return }
+
+        // 2. Derive the final document file URL ----------------------------------
+        let ext      = configuration.defaultFileType.preferredFilenameExtension ?? "file"
+        let finalURL = (mode == .folder)
+            ? baseURL.appendingPathComponent("\(baseURL.lastPathComponent).\(ext)")
+            : baseURL
+
+        // 3. Create, write, and open the NSDocument ------------------------------
+        do {
+            let document  = try makeUntitledDocument(ofType: configuration.defaultFileType.identifier)
+            document.fileURL = finalURL
+
+            try document.write(
+                to: finalURL,
+                ofType: configuration.defaultFileType.identifier,
+                for: .saveOperation,
+                originalContentsURL: nil
+            )
+
+            openDocument(
+                at: finalURL,
+                onCompletion: onCompletion,
+                onError: { error in
+                    NSAlert(error: error).runModal()
+                    onCancel()
+                }
+            )
+        } catch {
+            NSAlert(error: error).runModal()
+            onCancel()
+        }
     }
 
     /// Presents an open dialog to choose a document using the specified configuration.

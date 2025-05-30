@@ -87,6 +87,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				5ED3D0892DE9FBB400F6DB0B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				5ED3AEFC2DE72A2800F6DB0B /* WelcomeWindowExample */,
@@ -155,6 +156,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5ED3D0892DE9FBB400F6DB0B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 5ED3D0882DE9FBB400F6DB0B /* SwiftLint */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		5ED3AF1A2DE72A2900F6DB0B /* Debug */ = {
@@ -377,6 +385,11 @@
 		5ED3B5C62DE7490600F6DB0B /* WelcomeWindow */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WelcomeWindow;
+		};
+		5ED3D0882DE9FBB400F6DB0B /* SwiftLint */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5ED3B5C92DE74C9900F6DB0B /* XCRemoteSwiftPackageReference "SwiftLintPlugin" */;
+			productName = "plugin:SwiftLint";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

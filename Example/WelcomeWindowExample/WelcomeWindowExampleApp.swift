@@ -22,7 +22,7 @@ struct WelcomeWindowExampleApp: App {
                         iconName: "circle.fill",
                         title: "New Text Document",
                         action: {
-                            NSDocumentController.shared.createNewDocumentWithDialog(
+                            NSDocumentController.shared.createFileDocumentWithDialog(
                                 configuration: .init(title: "Create new text document"),
                                 onCompletion: { dismiss() }
                             )
@@ -42,7 +42,7 @@ struct WelcomeWindowExampleApp: App {
                 },
                 onDrop: { url, dismiss in
                     print("File dropped at: \(url.path)")
-                    
+
                     Task {
                         NSDocumentController.shared.openDocument(at: url, onCompletion: { dismiss() })
                     }

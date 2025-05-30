@@ -14,7 +14,9 @@ struct FolderView: View {
             if let url = document.folderURL {
                 Text("Folder: \(url.lastPathComponent)")
                 List {
-                    let contents = (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
+                    let contents =
+                    (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil))
+                    ?? []
                     ForEach(contents, id: \.self) { file in
                         Text(file.lastPathComponent)
                     }

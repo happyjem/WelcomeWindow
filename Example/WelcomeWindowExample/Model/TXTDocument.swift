@@ -5,7 +5,6 @@
 //  Created by Giorgi Tchelidze on 23.05.25.
 //
 
-
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -14,10 +13,13 @@ final class TXTDocument: NSDocument, ObservableObject {
 
     @Published var text = ""
 
-    override class var autosavesInPlace: Bool { true }
+    override static var autosavesInPlace: Bool { true }
 
     override func read(from data: Data, ofType typeName: String) throws {
-        text = String(decoding: data, as: UTF8.self)
+        guard let string = String(data: data, encoding: .utf8) else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        text = string
     }
 
     override func data(ofType typeName: String) throws -> Data {
