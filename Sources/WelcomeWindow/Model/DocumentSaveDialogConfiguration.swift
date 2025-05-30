@@ -37,6 +37,12 @@ public struct DocumentSaveDialogConfiguration {
     /// The initial directory shown when the dialog appears.
     public var directoryURL: URL?
 
+    /// Whether the save dialog should treat the name as a folder instead of a file.
+    ///
+    /// If true, the save dialog should allow folder selection or creation
+    /// (e.g., using `NSOpenPanel` instead of `NSSavePanel`).
+    public var saveAsFolder: Bool
+
     /// Creates a new `DocumentSaveDialogConfiguration` with the given parameters.
     ///
     /// - Parameters:
@@ -47,14 +53,16 @@ public struct DocumentSaveDialogConfiguration {
     ///   - defaultFileType: The content type that will be used to create the document. Defaults to `.plainText`.
     ///   - title: The title of the save dialog window. Default is `"Create a New Document"`.
     ///   - directoryURL: The default directory URL. Default is the user’s Documents folder.
+    ///   - saveAsFolder: Indicates whether to save a folder instead of a file.
     public init(
         prompt: String = "Create Document",
         nameFieldLabel: String = "File Name:",
         defaultFileName: String = "Untitled",
         allowedContentTypes: [UTType] = [UTType.plainText],
-        defaultFileType: UTType = UTType.plainText,
+        defaultFileType: UTType = .plainText,
         title: String = "Create a New Document",
-        directoryURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        directoryURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first,
+        saveAsFolder: Bool = false
     ) {
         self.prompt = prompt
         self.nameFieldLabel = nameFieldLabel
@@ -63,5 +71,6 @@ public struct DocumentSaveDialogConfiguration {
         self.defaultFileType = defaultFileType
         self.title = title
         self.directoryURL = directoryURL
+        self.saveAsFolder = saveAsFolder
     }
 }
