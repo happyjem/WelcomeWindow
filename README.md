@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/CodeEditApp/CodeEditWelcomeWindow/blob/main/.github/WelcomeWindow-Icon-128@2x.png?raw=true" height="128">
+  <img src="https://github.com/CodeEditApp/WelcomeWindow/blob/main/.github/WelcomeWindow-Icon-128@2x.png?raw=true" height="128">
   <h1 align="center">WelcomeWindow</h1>
 </p>
 
