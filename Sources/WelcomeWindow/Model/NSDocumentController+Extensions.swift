@@ -78,43 +78,41 @@ extension NSDocumentController {
         onCompletion: @escaping () -> Void,
         onCancel: @escaping () -> Void
     ) {
-        // Configure NSSavePanel
+
+        // 1. Configure NSSavePanel ------------------------------------------------
         let panel = NSSavePanel()
-        panel.prompt = configuration.prompt
-        panel.title = configuration.title
-        panel.nameFieldLabel = configuration.nameFieldLabel
+        panel.prompt               = configuration.prompt
+        panel.title                = configuration.title
+        panel.nameFieldLabel       = configuration.nameFieldLabel
         panel.canCreateDirectories = true
-        panel.directoryURL = configuration.directoryURL
-        panel.level = .modalPanel
+        panel.directoryURL         = configuration.directoryURL
+        panel.level                = .modalPanel
         panel.treatsFilePackagesAsDirectories = true
 
         switch mode {
         case .file:
             panel.nameFieldStringValue = configuration.defaultFileName
-            panel.allowedContentTypes = configuration.allowedContentTypes
+            panel.allowedContentTypes  = configuration.allowedContentTypes
         case .folder:
             panel.nameFieldStringValue =
-            URL(fileURLWithPath: configuration.defaultFileName)
-                .deletingPathExtension().lastPathComponent
-            panel.allowedContentTypes = [] // treat as folder
+                URL(fileURLWithPath: configuration.defaultFileName)
+                    .deletingPathExtension().lastPathComponent
+            panel.allowedContentTypes  = []                // treat as folder
         }
 
         DispatchQueue.main.async { onDialogPresented() }
         guard panel.runModal() == .OK,
               let baseURL = panel.url else { onCancel(); return }
 
-        // Derive the final document file URL
-        let finalURL: URL
-        if mode == .file && configuration.includeExtension {
-            let ext = configuration.defaultFileType.preferredFilenameExtension ?? "file"
-            finalURL = baseURL.appendingPathExtension(ext)
-        } else {
-            finalURL = baseURL
-        }
+        // 2. Derive the final document file URL ----------------------------------
+        let ext      = configuration.defaultFileType.preferredFilenameExtension ?? "file"
+        let finalURL = (mode == .folder)
+            ? baseURL.appendingPathComponent("\(baseURL.lastPathComponent).\(ext)")
+            : baseURL
 
-        // Create, write, and open the NSDocument
+        // 3. Create, write, and open the NSDocument ------------------------------
         do {
-            let document = try makeUntitledDocument(ofType: configuration.defaultFileType.identifier)
+            let document  = try makeUntitledDocument(ofType: configuration.defaultFileType.identifier)
             document.fileURL = finalURL
 
             try document.write(
@@ -147,7 +145,7 @@ extension NSDocumentController {
     ///   - onCancel: Called if the user cancels or an error occurs.
     @MainActor
     public func openDocumentWithDialog(
-        configuration: DocumentOpenDialogConfiguration = .init(),
+        configuration: DocumentOpenDialogConfiguration = DocumentOpenDialogConfiguration(),
         onDialogPresented: @escaping () -> Void = {},
         onCompletion: @escaping () -> Void = {},
         onCancel: @escaping () -> Void = {}

@@ -36,7 +36,7 @@ struct WelcomeWindowExampleApp: App {
                         action: {
                             NSDocumentController.shared.openDocumentWithDialog(
                                 configuration: .init(canChooseDirectories: true),
-                                onDialogPresented: { dismiss() },
+                                onCompletion: { dismiss() },
                                 onCancel: { openWindow(id: "welcome") }
                             )
                         }
