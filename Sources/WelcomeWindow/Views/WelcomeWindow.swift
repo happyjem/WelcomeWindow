@@ -13,12 +13,21 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
     private let buildActions: (_ dismissWindow: @escaping () -> Void) -> WelcomeActions
     private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
+    let iconImage: Image?
+    let title: String?
+    let subtitle: String?
 
     public init(
+        iconImage: Image? = nil,
+        title: String? = nil,
+        subtitle: String? = nil,
         @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
     ) {
+        self.iconImage = iconImage
+        self.title = title
+        self.subtitle = subtitle
         self.buildActions = actions
         self.customRecentsList = customRecentsList
         self.onDrop = onDrop
@@ -29,6 +38,9 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
         if #available(macOS 15, *) {
             return Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
                 WelcomeWindowView(
+                    iconImage: iconImage,
+                    title: title,
+                    subtitle: subtitle,
                     buildActions: buildActions,
                     onDrop: onDrop,
                     customRecentsList: customRecentsList
@@ -58,6 +70,9 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
     private var legacyWindow: some Scene {
         Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
             WelcomeWindowView(
+                iconImage: iconImage,
+                title: title,
+                subtitle: subtitle,
                 buildActions: buildActions,
                 onDrop: onDrop,
                 customRecentsList: customRecentsList
@@ -82,13 +97,22 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
 extension WelcomeWindow where RecentsView == EmptyView {
     /// Creates a welcome window without a custom recent projects list.
     /// - Parameters:
+    ///   - iconImage: An optional override for icon image.
+    ///   - title: An optional title override.
+    ///   - subtitle: An optional subtitle override.
     ///   - actions: A result builder closure that defines up to three SwiftUI action views.
     ///   - onDrop: An optional closure that handles dropped URLs.
     public init(
+        iconImage: Image? = nil,
+        title: String? = nil,
+        subtitle: String? = nil,
         @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
     ) {
         self.init(
+            iconImage: iconImage,
+            title: title,
+            subtitle: subtitle,
             actions: actions,
             customRecentsList: nil,
             onDrop: onDrop

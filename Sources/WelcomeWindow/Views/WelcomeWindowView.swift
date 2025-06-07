@@ -23,11 +23,21 @@ public struct WelcomeWindowView<RecentsView: View>: View {
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
     private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
 
+    let iconImage: Image?
+    let title: String?
+    let subtitle: String?
+
     public init(
+        iconImage: Image? = nil,
+        title: String? = nil,
+        subtitle: String? = nil,
         buildActions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
         customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil
     ) {
+        self.iconImage = iconImage
+        self.title = title
+        self.subtitle = subtitle
         self.buildActions = buildActions
         self.onDrop = onDrop
         self.customRecentsList = customRecentsList
@@ -39,6 +49,9 @@ public struct WelcomeWindowView<RecentsView: View>: View {
 
         return HStack(spacing: 0) {
             WelcomeView(
+                iconImage: iconImage,
+                title: title,
+                subtitle: subtitle,
                 actions: actions,
                 dismissWindow: dismiss,
                 focusedField: $focusedField

@@ -17,8 +17,9 @@ struct WelcomeWindowExampleApp: App {
     var body: some Scene {
         Group {
             WelcomeWindow(
+                title: "Welcome to SwiftUI!",
                 actions: { dismiss in
-                    WelcomeActionView(
+                    WelcomeButton(
                         iconName: "circle.fill",
                         title: "New Text Document",
                         action: {
@@ -28,7 +29,7 @@ struct WelcomeWindowExampleApp: App {
                             )
                         }
                     )
-                    WelcomeActionView(
+                    WelcomeButton(
                         iconName: "triangle.fill",
                         title: "Open Text Document or Folder",
                         action: {

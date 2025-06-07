@@ -9,6 +9,10 @@ import Foundation
 
 extension Bundle {
 
+    static var mainBundleIdentifier: String {
+        Bundle.main.bundleIdentifier ?? "Unknown"
+    }
+
     static var appName: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Unknown App"
     }

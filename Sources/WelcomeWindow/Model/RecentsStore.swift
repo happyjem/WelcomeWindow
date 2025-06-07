@@ -1,11 +1,6 @@
-//
-//  RecentProjectsUtil.swift
-//  CodeEdit
-//
-//  Created by Khan Winter on 10/22/24.
-//
-
 import AppKit
+import CoreSpotlight
+import OSLog
 
 /// A utility store for managing recent project file access using security-scoped bookmarks.
 public enum RecentsStore {
@@ -15,6 +10,8 @@ public enum RecentsStore {
 
     /// Notification sent when the recent projects list is updated.
     public static let didUpdateNotification = Notification.Name("RecentsStore.didUpdate")
+
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "", category: "RecentsStore")
 
     /// Internal representation of a bookmark entry.
     private struct BookmarkEntry: Codable, Equatable {
@@ -46,14 +43,18 @@ public enum RecentsStore {
     ///
     /// - Returns: An array of `URL` representing the recent projects.
     public static func recentProjectURLs() -> [URL] {
-        var seen = Set<String>()
-        return loadBookmarks().compactMap { entry in
-            guard let resolved = entry.url else { return nil }
-            let path = resolved.standardized.path
-            guard !seen.contains(path) else { return nil }
-            seen.insert(path)
-            return resolved
-        }
+        filterURLs(by: { url in
+            (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+        })
+    }
+
+    /// Returns an array of all recent single file URLs resolved from stored bookmarks.
+    ///
+    /// - Returns: An array of `URL` representing the recent files.
+    public static func recentFileURLs() -> [URL] {
+        filterURLs(by: { url in
+            !((try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false)
+        })
     }
 
     /// Notifies the store that a project was opened.
@@ -75,8 +76,9 @@ public enum RecentsStore {
             bookmarks.insert(BookmarkEntry(urlPath: standardizedPath, bookmarkData: bookmark), at: 0)
 
             saveBookmarks(Array(bookmarks.prefix(100)))
+            donateSearchableItems()
         } catch {
-            print("❌ Failed to create bookmark for recent project: \(error)")
+            logger.error("❌ Failed to create bookmark for recent project: \(error.localizedDescription)")
         }
     }
 
@@ -117,6 +119,21 @@ public enum RecentsStore {
 
     // MARK: - Internal
 
+    /// Filters URLs based on a condition, used to separate files and folders.
+    ///
+    /// - Parameter filter: Closure to determine if the URL should be included.
+    /// - Returns: An array of `URL` that match the filter condition.
+    private static func filterURLs(by filter: (URL) -> Bool) -> [URL] {
+        var seen = Set<String>()
+        return loadBookmarks().compactMap { entry in
+            guard let resolved = entry.url, filter(resolved) else { return nil }
+            let path = resolved.standardized.path
+            guard !seen.contains(path) else { return nil }
+            seen.insert(path)
+            return resolved
+        }
+    }
+
     /// Loads the stored bookmarks from UserDefaults.
     ///
     /// - Returns: An array of `BookmarkEntry` values decoded from UserDefaults.
@@ -134,5 +151,25 @@ public enum RecentsStore {
         guard let data = try? PropertyListEncoder().encode(entries) else { return }
         UserDefaults.standard.set(data, forKey: bookmarksKey)
         NotificationCenter.default.post(name: didUpdateNotification, object: nil)
+    }
+
+    /// Donates all recent URLs to CoreSpotlight, making them searchable in Spotlight.
+    private static func donateSearchableItems() {
+        let searchableItems = recentProjectURLs().map { url in
+            let attributeSet = CSSearchableItemAttributeSet(contentType: .content)
+            attributeSet.title = url.lastPathComponent
+            attributeSet.contentDescription = "Recent project in \(Bundle.displayName)."
+            attributeSet.relatedUniqueIdentifier = url.path
+            return CSSearchableItem(
+                uniqueIdentifier: url.path,
+                domainIdentifier: "\(Bundle.mainBundleIdentifier).ProjectItem",
+                attributeSet: attributeSet
+            )
+        }
+        CSSearchableIndex.default().indexSearchableItems(searchableItems) { error in
+            if let error = error {
+                logger.error("Failed to donate recent projects, error: \(error.localizedDescription)")
+            }
+        }
     }
 }

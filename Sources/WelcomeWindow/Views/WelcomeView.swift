@@ -25,11 +25,21 @@ public struct WelcomeView: View {
     private let dismissWindow: () -> Void
     private let actions: WelcomeActions
 
+    let iconImage: Image?
+    let title: String?
+    let subtitle: String?
+
     public init(
+        iconImage: Image? = nil,
+        title: String? = nil,
+        subtitle: String? = nil,
         actions: WelcomeActions,
         dismissWindow: @escaping () -> Void,
         focusedField: FocusState<FocusTarget?>.Binding
     ) {
+        self.iconImage = iconImage
+        self.title = title
+        self.subtitle = subtitle
         self.actions = actions
         self.dismissWindow = dismissWindow
         self._focusedField = focusedField
@@ -92,15 +102,19 @@ public struct WelcomeView: View {
                         .blur(radius: 64)
                         .opacity(0.5)
                 }
-                Image(nsImage: NSApp.applicationIconImage)
+                (iconImage ?? Image(nsImage: NSApp.applicationIconImage))
                     .resizable()
                     .frame(width: 128, height: 128)
             }
 
-            Text(Bundle.displayName)
+            Text(title ?? Bundle.displayName)
                 .font(.system(size: 36, weight: .bold))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.5)
+                .fixedSize(horizontal: false, vertical: true)
 
-            Text(String(
+            Text(subtitle ?? String(
                 format: NSLocalizedString("Version %@%@ (%@)", comment: ""),
                 appVersion, appVersionPostfix, appBuild
             ))
@@ -133,18 +147,13 @@ public struct WelcomeView: View {
                     case let .three(view1, view2, view3):
                         view1
                             .focused($focusedField, equals: .action1)
-                            .contentShape(Rectangle())
                         view2
                             .focused($focusedField, equals: .action2)
-                            .contentShape(Rectangle())
                         view3
                             .focused($focusedField, equals: .action3)
-                            .contentShape(Rectangle())
                     }
-
                 }
             }
-
             Spacer()
         }
         .padding(.top, 20)
