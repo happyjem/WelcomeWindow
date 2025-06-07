@@ -36,6 +36,9 @@ public struct DocumentSaveDialogConfiguration {
 
     /// The initial directory shown when the dialog appears.
     public var directoryURL: URL?
+    
+    /// Should file be created with or without an extension.
+    public var includeExtension: Bool
 
     /// Creates a new `DocumentSaveDialogConfiguration` with the given parameters.
     ///
@@ -47,6 +50,7 @@ public struct DocumentSaveDialogConfiguration {
     ///   - defaultFileType: The content type that will be used to create the document. Defaults to `.plainText`.
     ///   - title: The title of the save dialog window. Default is `"Create a New Document"`.
     ///   - directoryURL: The default directory URL. Default is the user’s Documents folder.
+    ///   - includeExtension: Should include file extension.
     public init(
         prompt: String = "Create Document",
         nameFieldLabel: String = "File Name:",
@@ -54,7 +58,8 @@ public struct DocumentSaveDialogConfiguration {
         allowedContentTypes: [UTType] = [UTType.plainText],
         defaultFileType: UTType = UTType.plainText,
         title: String = "Create a New Document",
-        directoryURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        directoryURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first,
+        includeExtension: Bool = true
     ) {
         self.prompt = prompt
         self.nameFieldLabel = nameFieldLabel
@@ -63,5 +68,6 @@ public struct DocumentSaveDialogConfiguration {
         self.defaultFileType = defaultFileType
         self.title = title
         self.directoryURL = directoryURL
+        self.includeExtension = includeExtension
     }
 }
