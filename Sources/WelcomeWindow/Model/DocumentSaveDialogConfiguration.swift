@@ -36,7 +36,7 @@ public struct DocumentSaveDialogConfiguration {
 
     /// The initial directory shown when the dialog appears.
     public var directoryURL: URL?
-    
+
     /// Should file be created with or without an extension.
     public var includeExtension: Bool
 

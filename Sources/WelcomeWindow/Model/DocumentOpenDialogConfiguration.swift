@@ -36,7 +36,7 @@ public struct DocumentOpenDialogConfiguration {
     ///   - directoryURL: The default URL to display. Default is the user's document directory.
     public init(
         title: String = "Open Document",
-        allowedContentTypes: [UTType] = [UTType.plainText],
+        allowedContentTypes: [UTType] = [],
         canChooseFiles: Bool = true,
         canChooseDirectories: Bool = false,
         directoryURL: URL? = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first

@@ -118,9 +118,11 @@ public struct WelcomeView: View {
                 format: NSLocalizedString("Version %@%@ (%@)", comment: ""),
                 appVersion, appVersionPostfix, appBuild
             ))
-                .textSelection(.enabled)
+
                 .foregroundColor(.secondary)
                 .font(.system(size: 13.5))
+
+                .textSelection(.enabled)
                 .onHover { $0 ? NSCursor.pointingHand.push() : NSCursor.pop() }
                 .onTapGesture { copyInformation() }
                 .help("Copy System Information to Clipboard")
@@ -173,7 +175,6 @@ public struct WelcomeView: View {
         .onAppear {
             if let averageNSColor = NSApp.applicationIconImage.dominantColor() {
                 appIconAverageColor = Color(averageNSColor)
-                print(Color(averageNSColor).description)
             }
         }
     }
