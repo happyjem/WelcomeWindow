@@ -72,68 +72,70 @@ extension NSDocumentController {
     /// Internal helper that contains 100 % of the common logic.
     @MainActor
     private func _createDocument(
-        mode: SaveMode,
-        configuration: DocumentSaveDialogConfiguration,
-        onDialogPresented: @escaping () -> Void,
-        onCompletion: @escaping () -> Void,
-        onCancel: @escaping () -> Void
+        mode: SaveMode,
+        configuration: DocumentSaveDialogConfiguration,
+        onDialogPresented: @escaping () -> Void,
+        onCompletion: @escaping () -> Void,
+        onCancel: @escaping () -> Void
     ) {
+        // Configure NSSavePanel
+        let panel = NSSavePanel()
+        panel.prompt               = configuration.prompt
+        panel.title                = configuration.title
+        panel.nameFieldLabel       = configuration.nameFieldLabel
+        panel.canCreateDirectories = true
+        panel.directoryURL         = configuration.directoryURL
+        panel.level                = .modalPanel
+        panel.treatsFilePackagesAsDirectories = true
 
-        // 1. Configure NSSavePanel ------------------------------------------------
-        let panel = NSSavePanel()
-        panel.prompt               = configuration.prompt
-        panel.title                = configuration.title
-        panel.nameFieldLabel       = configuration.nameFieldLabel
-        panel.canCreateDirectories = true
-        panel.directoryURL         = configuration.directoryURL
-        panel.level                = .modalPanel
-        panel.treatsFilePackagesAsDirectories = true
+        switch mode {
+        case .file:
+            panel.nameFieldStringValue = configuration.defaultFileName
+            panel.allowedContentTypes  = configuration.allowedContentTypes
+        case .folder:
+            panel.nameFieldStringValue =
+                URL(fileURLWithPath: configuration.defaultFileName)
+                    .deletingPathExtension().lastPathComponent
+            panel.allowedContentTypes  = []                // treat as folder
+        }
 
-        switch mode {
-        case .file:
-            panel.nameFieldStringValue = configuration.defaultFileName
-            panel.allowedContentTypes  = configuration.allowedContentTypes
-        case .folder:
-            panel.nameFieldStringValue =
-                URL(fileURLWithPath: configuration.defaultFileName)
-                    .deletingPathExtension().lastPathComponent
-            panel.allowedContentTypes  = []                // treat as folder
-        }
+        DispatchQueue.main.async { onDialogPresented() }
+        guard panel.runModal() == .OK,
+              let baseURL = panel.url else { onCancel(); return }
 
-        DispatchQueue.main.async { onDialogPresented() }
-        guard panel.runModal() == .OK,
-              let baseURL = panel.url else { onCancel(); return }
+        // Derive the final document file URL
+        let finalURL: URL
+        if mode == .file && configuration.includeExtension {
+            let ext = configuration.defaultFileType.preferredFilenameExtension ?? "file"
+            finalURL = baseURL.appendingPathExtension(ext)
+        } else {
+            finalURL = baseURL
+        }
 
-        // 2. Derive the final document file URL ----------------------------------
-        let ext      = configuration.defaultFileType.preferredFilenameExtension ?? "file"
-        let finalURL = (mode == .folder)
-            ? baseURL.appendingPathComponent("\(baseURL.lastPathComponent).\(ext)")
-            : baseURL
+        // Create, write, and open the NSDocument
+        do {
+            let document  = try makeUntitledDocument(ofType: configuration.defaultFileType.identifier)
+            document.fileURL = finalURL
 
-        // 3. Create, write, and open the NSDocument ------------------------------
-        do {
-            let document  = try makeUntitledDocument(ofType: configuration.defaultFileType.identifier)
-            document.fileURL = finalURL
+            try document.write(
+                to: finalURL,
+                ofType: configuration.defaultFileType.identifier,
+                for: .saveOperation,
+                originalContentsURL: nil
+            )
 
-            try document.write(
-                to: finalURL,
-                ofType: configuration.defaultFileType.identifier,
-                for: .saveOperation,
-                originalContentsURL: nil
-            )
-
-            openDocument(
-                at: finalURL,
-                onCompletion: onCompletion,
-                onError: { error in
-                    NSAlert(error: error).runModal()
-                    onCancel()
-                }
-            )
-        } catch {
-            NSAlert(error: error).runModal()
-            onCancel()
-        }
+            openDocument(
+                at: finalURL,
+                onCompletion: onCompletion,
+                onError: { error in
+                    NSAlert(error: error).runModal()
+                    onCancel()
+                }
+            )
+        } catch {
+            NSAlert(error: error).runModal()
+            onCancel()
+        }
     }
 
     /// Presents an open dialog to choose a document using the specified configuration.
