@@ -188,8 +188,8 @@ extension NSDocumentController {
                 NSAlert(error: error).runModal()
                 onError(error)
             } else {
-                NSApp.activate(ignoringOtherApps: true)
                 RecentsStore.documentOpened(at: url)
+                NSApp.activate(ignoringOtherApps: true)
                 onCompletion()
             }
         }

@@ -84,12 +84,19 @@ public struct RecentsListView: View {
             removeRecentProjects()
         }
         .background {
-            if colorScheme == .dark {
-                Color(.black).opacity(0.075)
-                    .background(.thickMaterial)
-            } else {
-                Color(.white).opacity(0.6)
-                    .background(.regularMaterial)
+            ZStack {
+                if colorScheme == .dark {
+                    Color(.black).opacity(0.075)
+                        .background(.thickMaterial)
+                } else {
+                    Color(.white).opacity(0.6)
+                        .background(.regularMaterial)
+                }
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selection.removeAll()
+                    }
             }
         }
         .background {
