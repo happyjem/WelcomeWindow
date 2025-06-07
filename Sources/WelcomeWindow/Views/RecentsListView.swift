@@ -40,7 +40,7 @@ public struct RecentsListView: View {
     private var listEmptyView: some View {
         VStack {
             Spacer()
-            Text(NSLocalizedString("No Recent Projects", comment: ""))
+            Text("No Recent Projects")
                 .font(.body)
                 .foregroundColor(.secondary)
             Spacer()

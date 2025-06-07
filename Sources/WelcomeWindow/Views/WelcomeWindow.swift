@@ -9,27 +9,29 @@ import SwiftUI
 
 /// A customizable welcome window scene supporting up to three content views
 /// and an optional custom recent projects list.
-public struct WelcomeWindow<RecentsView: View>: Scene {
+public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
+
     private let buildActions: (_ dismissWindow: @escaping () -> Void) -> WelcomeActions
     private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
+    private let subtitleView: (() -> SubtitleView)?
+
     let iconImage: Image?
     let title: String?
-    let subtitle: String?
 
     public init(
         iconImage: Image? = nil,
         title: String? = nil,
-        subtitle: String? = nil,
         @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil,
+        subtitleView: (() -> SubtitleView)? = nil,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
     ) {
         self.iconImage = iconImage
         self.title = title
-        self.subtitle = subtitle
         self.buildActions = actions
         self.customRecentsList = customRecentsList
+        self.subtitleView = subtitleView
         self.onDrop = onDrop
     }
 
@@ -40,7 +42,7 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
                 WelcomeWindowView(
                     iconImage: iconImage,
                     title: title,
-                    subtitle: subtitle,
+                    subtitleView: subtitleView,
                     buildActions: buildActions,
                     onDrop: onDrop,
                     customRecentsList: customRecentsList
@@ -72,7 +74,7 @@ public struct WelcomeWindow<RecentsView: View>: Scene {
             WelcomeWindowView(
                 iconImage: iconImage,
                 title: title,
-                subtitle: subtitle,
+                subtitleView: subtitleView,
                 buildActions: buildActions,
                 onDrop: onDrop,
                 customRecentsList: customRecentsList
@@ -105,16 +107,76 @@ extension WelcomeWindow where RecentsView == EmptyView {
     public init(
         iconImage: Image? = nil,
         title: String? = nil,
-        subtitle: String? = nil,
         @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
     ) {
         self.init(
             iconImage: iconImage,
             title: title,
-            subtitle: subtitle,
             actions: actions,
             customRecentsList: nil,
+            onDrop: onDrop
+        )
+    }
+}
+
+// ONLY SUBTITLE VIEW
+extension WelcomeWindow where RecentsView == EmptyView {
+    /// Initializer for only subtitle view.
+    public init(
+        iconImage: Image? = nil,
+        title: String? = nil,
+        subtitleView: @escaping () -> SubtitleView,
+        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
+        onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
+    ) {
+        self.init(
+            iconImage: iconImage,
+            title: title,
+            actions: actions,
+            customRecentsList: nil,
+            subtitleView: subtitleView,
+            onDrop: onDrop
+        )
+    }
+}
+
+// ONLY RECENTS LIST
+extension WelcomeWindow where SubtitleView == EmptyView {
+    /// Initializer for only recents list view.
+    public init(
+        iconImage: Image? = nil,
+        title: String? = nil,
+        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
+        customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil,
+        onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
+    ) {
+        self.init(
+            iconImage: iconImage,
+            title: title,
+            actions: actions,
+            customRecentsList: customRecentsList,
+            subtitleView: nil,
+            onDrop: onDrop
+        )
+    }
+}
+
+// NEITHER OPTIONAL VIEW
+extension WelcomeWindow where RecentsView == EmptyView, SubtitleView == EmptyView {
+    /// Initializer for neither of optionals provided.
+    public init(
+        iconImage: Image? = nil,
+        title: String? = nil,
+        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
+        onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
+    ) {
+        self.init(
+            iconImage: iconImage,
+            title: title,
+            actions: actions,
+            customRecentsList: nil,
+            subtitleView: nil,
             onDrop: onDrop
         )
     }

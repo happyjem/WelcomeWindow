@@ -8,7 +8,7 @@
 import SwiftUI
 import AppKit
 
-public struct WelcomeWindowView<RecentsView: View>: View {
+public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
     @Environment(\.dismiss)
     private var dismissWindow
 
@@ -22,22 +22,22 @@ public struct WelcomeWindowView<RecentsView: View>: View {
     private let buildActions: (_ dismissWindow: @escaping () -> Void) -> WelcomeActions
     private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
     private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
+    private let subtitleView: (() -> SubtitleView)?
 
     let iconImage: Image?
     let title: String?
-    let subtitle: String?
 
     public init(
         iconImage: Image? = nil,
         title: String? = nil,
-        subtitle: String? = nil,
+        subtitleView: (() -> SubtitleView)? = nil,
         buildActions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
         customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil
     ) {
         self.iconImage = iconImage
         self.title = title
-        self.subtitle = subtitle
+        self.subtitleView = subtitleView
         self.buildActions = buildActions
         self.onDrop = onDrop
         self.customRecentsList = customRecentsList
@@ -51,7 +51,7 @@ public struct WelcomeWindowView<RecentsView: View>: View {
             WelcomeView(
                 iconImage: iconImage,
                 title: title,
-                subtitle: subtitle,
+                subtitleView: subtitleView,
                 actions: actions,
                 dismissWindow: dismiss,
                 focusedField: $focusedField

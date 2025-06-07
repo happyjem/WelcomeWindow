@@ -9,7 +9,7 @@ import SwiftUI
 import AppKit
 import Foundation
 
-public struct WelcomeView: View {
+public struct WelcomeView<SubtitleView: View>: View {
 
     @Environment(\.colorScheme)
     private var colorScheme
@@ -24,22 +24,22 @@ public struct WelcomeView: View {
 
     private let dismissWindow: () -> Void
     private let actions: WelcomeActions
+    private let subtitleView: (() -> SubtitleView)?
 
     let iconImage: Image?
     let title: String?
-    let subtitle: String?
 
     public init(
         iconImage: Image? = nil,
         title: String? = nil,
-        subtitle: String? = nil,
+        subtitleView: (() -> SubtitleView)? = nil,
         actions: WelcomeActions,
         dismissWindow: @escaping () -> Void,
         focusedField: FocusState<FocusTarget?>.Binding
     ) {
         self.iconImage = iconImage
         self.title = title
-        self.subtitle = subtitle
+        self.subtitleView = subtitleView
         self.actions = actions
         self.dismissWindow = dismissWindow
         self._focusedField = focusedField
@@ -48,40 +48,6 @@ public struct WelcomeView: View {
     private var appVersion: String { Bundle.versionString ?? "" }
     private var appBuild: String { Bundle.buildString ?? "" }
     private var appVersionPostfix: String { Bundle.versionPostfix ?? "" }
-
-    private var macOSVersion: String {
-        let url = URL(fileURLWithPath: "/System/Library/CoreServices/SystemVersion.plist")
-        guard let dict = NSDictionary(contentsOf: url),
-              let version = dict["ProductUserVisibleVersion"],
-              let build = dict["ProductBuildVersion"] else {
-            return ProcessInfo.processInfo.operatingSystemVersionString
-        }
-        return "\(version) (\(build))"
-    }
-
-    private var xcodeVersion: String? {
-        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.dt.Xcode"),
-              let bundle = Bundle(url: url),
-              let infoDict = bundle.infoDictionary,
-              let version = infoDict["CFBundleShortVersionString"] as? String,
-              let buildURL = URL(string: "\(url)Contents/version.plist"),
-              let buildDict = try? NSDictionary(contentsOf: buildURL, error: ()),
-              let build = buildDict["ProductBuildVersion"]
-        else {
-            return nil
-        }
-        return "\(version) (\(build))"
-    }
-
-    private func copyInformation() {
-        var copyString = "\(Bundle.displayName): \(appVersion)\(appVersionPostfix) (\(appBuild))\n"
-        copyString.append("macOS: \(macOSVersion)\n")
-        if let xcodeVersion { copyString.append("Xcode: \(xcodeVersion)") }
-
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(copyString, forType: .string)
-    }
 
     public var body: some View {
         ZStack(alignment: .topLeading) {
@@ -114,18 +80,18 @@ public struct WelcomeView: View {
                 .minimumScaleFactor(0.5)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text(subtitle ?? String(
-                format: NSLocalizedString("Version %@%@ (%@)", comment: ""),
-                appVersion, appVersionPostfix, appBuild
-            ))
-
-                .foregroundColor(.secondary)
-                .font(.system(size: 13.5))
-
-                .textSelection(.enabled)
-                .onHover { $0 ? NSCursor.pointingHand.push() : NSCursor.pop() }
-                .onTapGesture { copyInformation() }
-                .help("Copy System Information to Clipboard")
+            Group {
+                if let subtitleView {
+                    subtitleView()
+                } else {
+                    Text(String(
+                        format: "Version %@%@ (%@)",
+                        appVersion, appVersionPostfix, appBuild
+                    ))
+                }
+            }
+            .foregroundColor(.secondary)
+            .font(.system(size: 13.5))
 
             Spacer().frame(height: 40)
 
