@@ -18,6 +18,7 @@ struct WelcomeWindowExampleApp: App {
         Group {
             WelcomeWindow(
                 title: "Welcome to SwiftUI!",
+                subtitleView: { Text("Custom subtitle") },
                 actions: { dismiss in
                     WelcomeButton(
                         iconName: "circle.fill",

@@ -96,17 +96,15 @@ public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
     }
 }
 
-extension WelcomeWindow where RecentsView == EmptyView {
-    /// Creates a welcome window without a custom recent projects list.
-    /// - Parameters:
-    ///   - iconImage: An optional override for icon image.
-    ///   - title: An optional title override.
-    ///   - subtitle: An optional subtitle override.
-    ///   - actions: A result builder closure that defines up to three SwiftUI action views.
-    ///   - onDrop: An optional closure that handles dropped URLs.
+// ──────────────────────────────────────────────────────────────
+// 1)  NEITHER a custom recents list NOR a subtitle view
+// ──────────────────────────────────────────────────────────────
+extension WelcomeWindow where RecentsView == EmptyView, SubtitleView == EmptyView {
+    /// Creates a welcome window without a custom recent-projects list
+    /// *and* without a custom subtitle view.
     public init(
         iconImage: Image? = nil,
-        title: String? = nil,
+        title: String?    = nil,
         @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
     ) {
@@ -115,17 +113,21 @@ extension WelcomeWindow where RecentsView == EmptyView {
             title: title,
             actions: actions,
             customRecentsList: nil,
+            subtitleView: nil,
             onDrop: onDrop
         )
     }
 }
 
-// ONLY SUBTITLE VIEW
+// ──────────────────────────────────────────────────────────────
+// 2)  ONLY a custom subtitle view
+// ──────────────────────────────────────────────────────────────
 extension WelcomeWindow where RecentsView == EmptyView {
-    /// Initializer for only subtitle view.
+    /// Creates a welcome window that shows a custom subtitle view
+    /// but no custom recent-projects list.
     public init(
         iconImage: Image? = nil,
-        title: String? = nil,
+        title: String?    = nil,
         subtitleView: @escaping () -> SubtitleView,
         @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
@@ -141,12 +143,15 @@ extension WelcomeWindow where RecentsView == EmptyView {
     }
 }
 
-// ONLY RECENTS LIST
+// ──────────────────────────────────────────────────────────────
+// 3)  ONLY a custom recent-projects list
+// ──────────────────────────────────────────────────────────────
 extension WelcomeWindow where SubtitleView == EmptyView {
-    /// Initializer for only recents list view.
+    /// Creates a welcome window that shows a custom recent-projects list
+    /// but no custom subtitle view.
     public init(
         iconImage: Image? = nil,
-        title: String? = nil,
+        title: String?    = nil,
         @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
         customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil,
         onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
@@ -156,26 +161,6 @@ extension WelcomeWindow where SubtitleView == EmptyView {
             title: title,
             actions: actions,
             customRecentsList: customRecentsList,
-            subtitleView: nil,
-            onDrop: onDrop
-        )
-    }
-}
-
-// NEITHER OPTIONAL VIEW
-extension WelcomeWindow where RecentsView == EmptyView, SubtitleView == EmptyView {
-    /// Initializer for neither of optionals provided.
-    public init(
-        iconImage: Image? = nil,
-        title: String? = nil,
-        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
-        onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
-    ) {
-        self.init(
-            iconImage: iconImage,
-            title: title,
-            actions: actions,
-            customRecentsList: nil,
             subtitleView: nil,
             onDrop: onDrop
         )
