@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5ED3B5C72DE7490600F6DB0B /* WelcomeWindow in Frameworks */ = {isa = PBXBuildFile; productRef = 5ED3B5C62DE7490600F6DB0B /* WelcomeWindow */; };
+		5EACE6612DF4D56C005E08B8 /* WelcomeWindow in Frameworks */ = {isa = PBXBuildFile; productRef = 5EACE6602DF4D56C005E08B8 /* WelcomeWindow */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5EACE65F2DF4D569005E08B8 /* WelcomeWindow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WelcomeWindow; path = ..; sourceTree = "<group>"; };
 		5ED3AEFA2DE72A2800F6DB0B /* WelcomeWindowExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WelcomeWindowExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5ED3B5B22DE747D400F6DB0B /* WelcomeWindow */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = WelcomeWindow; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -41,18 +41,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5ED3B5C72DE7490600F6DB0B /* WelcomeWindow in Frameworks */,
+				5EACE6612DF4D56C005E08B8 /* WelcomeWindow in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5EACE65E2DF4D569005E08B8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5EACE65F2DF4D569005E08B8 /* WelcomeWindow */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5ED3AEF12DE72A2800F6DB0B = {
 			isa = PBXGroup;
 			children = (
 				5ED3AEFC2DE72A2800F6DB0B /* WelcomeWindowExample */,
-				5ED3B5B12DE747D400F6DB0B /* Frameworks */,
+				5EACE65E2DF4D569005E08B8 /* Frameworks */,
 				5ED3AEFB2DE72A2800F6DB0B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,14 +71,6 @@
 				5ED3AEFA2DE72A2800F6DB0B /* WelcomeWindowExample.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		5ED3B5B12DE747D400F6DB0B /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				5ED3B5B22DE747D400F6DB0B /* WelcomeWindow */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -94,7 +94,7 @@
 			);
 			name = WelcomeWindowExample;
 			packageProductDependencies = (
-				5ED3B5C62DE7490600F6DB0B /* WelcomeWindow */,
+				5EACE6602DF4D56C005E08B8 /* WelcomeWindow */,
 			);
 			productName = WelcomeWindowExample;
 			productReference = 5ED3AEFA2DE72A2800F6DB0B /* WelcomeWindowExample.app */;
@@ -293,12 +293,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WelcomeWindowExample/WelcomeWindowExample.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = HG8TU44368;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -325,12 +325,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WelcomeWindowExample/WelcomeWindowExample.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = HG8TU44368;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -386,7 +386,7 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		5ED3B5C62DE7490600F6DB0B /* WelcomeWindow */ = {
+		5EACE6602DF4D56C005E08B8 /* WelcomeWindow */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = WelcomeWindow;
 		};

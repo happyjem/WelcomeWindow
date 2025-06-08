@@ -11,8 +11,6 @@ public enum RecentsStore {
     /// Notification sent when the recent projects list is updated.
     public static let didUpdateNotification = Notification.Name("RecentsStore.didUpdate")
 
-    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "", category: "RecentsStore")
-
     /// Internal representation of a bookmark entry.
     private struct BookmarkEntry: Codable, Equatable {
         /// The standardized file path of the bookmarked URL.
@@ -37,24 +35,26 @@ public enum RecentsStore {
         }
     }
 
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "com.example.app",
+        category: "RecentsStore"
+    )
+
     // MARK: - Public API
 
     /// Returns an array of all recent project URLs resolved from stored bookmarks.
     ///
     /// - Returns: An array of `URL` representing the recent projects.
     public static func recentProjectURLs() -> [URL] {
-        filterURLs(by: { url in
-            (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
-        })
-    }
-
-    /// Returns an array of all recent single file URLs resolved from stored bookmarks.
-    ///
-    /// - Returns: An array of `URL` representing the recent files.
-    public static func recentFileURLs() -> [URL] {
-        filterURLs(by: { url in
-            !((try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false)
-        })
+        var seen = Set<String>()
+        return loadBookmarks().compactMap { entry in
+            guard let resolved = entry.url else { return nil }
+            guard !isInTrash(resolved) else { return nil }
+            let path = resolved.standardized.path
+            guard !seen.contains(path) else { return nil }
+            seen.insert(path)
+            return resolved
+        }
     }
 
     /// Notifies the store that a project was opened.
@@ -76,9 +76,8 @@ public enum RecentsStore {
             bookmarks.insert(BookmarkEntry(urlPath: standardizedPath, bookmarkData: bookmark), at: 0)
 
             saveBookmarks(Array(bookmarks.prefix(100)))
-            donateSearchableItems()
         } catch {
-            logger.error("❌ Failed to create bookmark for recent project: \(error.localizedDescription)")
+            print("❌ Failed to create bookmark for recent project: \(error)")
         }
     }
 
@@ -126,12 +125,24 @@ public enum RecentsStore {
     private static func filterURLs(by filter: (URL) -> Bool) -> [URL] {
         var seen = Set<String>()
         return loadBookmarks().compactMap { entry in
-            guard let resolved = entry.url, filter(resolved) else { return nil }
+            guard let resolved = entry.url,
+                  !isInTrash(resolved),
+                  filter(resolved)
+            else { return nil }
+
             let path = resolved.standardized.path
             guard !seen.contains(path) else { return nil }
             seen.insert(path)
             return resolved
         }
+    }
+
+    /// Returns `true` when the url resides in a macOS Trash folder.
+    private static func isInTrash(_ url: URL) -> Bool {
+        let comps = url.standardized.pathComponents
+        //  ~/.Trash/...              → ".Trash"
+        //  /Volumes/Disk/.Trashes/501/...  → ".Trashes"
+        return comps.contains(".Trash") || comps.contains(".Trashes")
     }
 
     /// Loads the stored bookmarks from UserDefaults.
