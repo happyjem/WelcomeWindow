@@ -57,6 +57,17 @@ public enum RecentsStore {
         }
     }
 
+    // MARK: - Folder / file specific access
+    /// Recent entries that are directories (projects that live in folders, asset catalogs, …)
+    public static func recentDirectoryURLs() -> [URL] {
+        filterURLs { $0.isDirectory }
+    }
+
+    /// Recent entries that are regular files (App documents, text files, …)
+    public static func recentFileURLs() -> [URL] {
+        filterURLs { !$0.isDirectory }
+    }
+
     /// Notifies the store that a project was opened.
     ///
     /// This saves a security-scoped bookmark for the URL and moves it to the top of the recent list.
