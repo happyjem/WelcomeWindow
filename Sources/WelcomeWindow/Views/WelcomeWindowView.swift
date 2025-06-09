@@ -9,8 +9,12 @@ import SwiftUI
 import AppKit
 
 public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
+
     @Environment(\.dismiss)
     private var dismissWindow
+
+    @Environment(\.colorScheme)
+    private var colorScheme
 
     @FocusState private var focusedField: FocusTarget?
 
@@ -57,15 +61,28 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
                 focusedField: $focusedField
             )
 
-            if let customList = customRecentsList {
-                customList(dismiss)
-            } else {
-                RecentsListView(
-                    recentProjects: $recentProjects,
-                    selection: $selection,
-                    focusedField: $focusedField,
-                    dismissWindow: dismiss
-                )
+            Group {
+                if let customList = customRecentsList {
+                    customList(dismiss)
+                } else {
+                    RecentsListView(
+                        recentProjects: $recentProjects,
+                        selection: $selection,
+                        focusedField: $focusedField,
+                        dismissWindow: dismiss
+                    )
+                }
+            }
+            .listStyle(.sidebar)
+            .scrollContentBackground(.hidden)
+            .background {
+                if colorScheme == .dark {
+                    Color(.black).opacity(0.075)
+                        .background(.thickMaterial)
+                } else {
+                    Color(.white).opacity(0.6)
+                        .background(.regularMaterial)
+                }
             }
         }
         .clipShape(.rect(cornerRadius: 8))

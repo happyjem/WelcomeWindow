@@ -52,8 +52,6 @@ public struct RecentsListView: View {
             RecentsListItem(projectPath: project)
         }
         .focused($focusedField, equals: .recentProjects)
-        .listStyle(.sidebar)
-        .scrollContentBackground(.hidden)
         .contextMenu(forSelectionType: URL.self) { items in
             if !items.isEmpty {
                 Button("Show in Finder") {
@@ -82,15 +80,6 @@ public struct RecentsListView: View {
         }
         .onDeleteCommand {
             removeRecentProjects()
-        }
-        .background {
-            if colorScheme == .dark {
-                Color(.black).opacity(0.075)
-                    .background(.thickMaterial)
-            } else {
-                Color(.white).opacity(0.6)
-                    .background(.regularMaterial)
-            }
         }
         .background {
             Button("") {
