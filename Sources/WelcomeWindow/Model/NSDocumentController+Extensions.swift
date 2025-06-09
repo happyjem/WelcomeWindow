@@ -183,8 +183,10 @@ extension NSDocumentController {
     ) {
         let accessGranted = RecentsStore.beginAccessing(url)
         openDocument(withContentsOf: url, display: true) { _, _, error in
-            defer { if accessGranted { RecentsStore.endAccessing(url) } }
             if let error {
+                if accessGranted {
+                    RecentsStore.endAccessing(url)
+                }
                 NSAlert(error: error).runModal()
                 onError(error)
             } else {
