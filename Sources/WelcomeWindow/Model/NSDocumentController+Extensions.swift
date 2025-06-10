@@ -187,11 +187,15 @@ extension NSDocumentController {
                 if accessGranted {
                     RecentsStore.endAccessing(url)
                 }
-                NSAlert(error: error).runModal()
+                DispatchQueue.main.async {
+                    NSAlert(error: error).runModal()
+                }
                 onError(error)
             } else {
                 RecentsStore.documentOpened(at: url)
-                NSApp.activate(ignoringOtherApps: true)
+                DispatchQueue.main.async {
+                    NSApp.activate(ignoringOtherApps: true)
+                }
                 onCompletion()
             }
         }
