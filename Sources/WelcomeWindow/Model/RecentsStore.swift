@@ -12,7 +12,7 @@ public enum RecentsStore {
     public static let didUpdateNotification = Notification.Name("RecentsStore.didUpdate")
     
     /// For tests (or previews) before any API call.
-    public static var defaults: UserDefaults = .standard
+    @MainActor public static var defaults: UserDefaults = .standard
 
     /// Internal representation of a bookmark entry.
     private struct BookmarkEntry: Codable, Equatable {
