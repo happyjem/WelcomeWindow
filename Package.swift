@@ -10,7 +10,8 @@ let package = Package(
     products: [
         .library(
             name: "WelcomeWindow",
-            targets: ["WelcomeWindow"]),
+            targets: ["WelcomeWindow"]
+        ),
     ],
     dependencies: [
         .package(
