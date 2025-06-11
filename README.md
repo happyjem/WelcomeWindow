@@ -18,8 +18,7 @@
 A highly customizable welcome window built for macOS applications. This package supports NSDocument-based apps and offers the ability to override the recent list for other use cases. It's designed to provide a native and elegant welcome experience for your app at launch, with support for new/open document actions, drag-and-drop functionality, and dynamic layouts.
 
 ![GitHub release](https://img.shields.io/github/v/release/CodeEditApp/WelcomeWindow?color=orange&label=latest%20release&sort=semver&style=flat-square)
-![Github Tests](https://img.shields.io/github/actions/workflow/status/CodeEditApp/WelcomeWindow/tests.yml?branch=main&label=tests&style=flat-square)
-![Documentation](https://img.shields.io/github/actions/workflow/status/CodeEditApp/WelcomeWindow/build-documentation.yml?branch=main&label=docs&style=flat-square)
+![Github Tests](https://img.shields.io/github/actions/workflow/status/CodeEditApp/WelcomeWindow/CI-push.yml?branch=main&label=tests&style=flat-square)
 ![GitHub Repo stars](https://img.shields.io/github/stars/CodeEditApp/WelcomeWindow?style=flat-square)
 ![GitHub forks](https://img.shields.io/github/forks/CodeEditApp/WelcomeWindow?style=flat-square)
 [![Discord Badge](https://img.shields.io/discord/951544472238444645?color=5865F2&label=Discord&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/vChUXVf9Em)
