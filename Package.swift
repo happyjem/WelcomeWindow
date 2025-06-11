@@ -24,6 +24,7 @@ let package = Package(
             plugins: [
                 .plugin(name: "SwiftLint", package: "SwiftLintPlugin")
             ]
-        )
+        ),
+        .testTarget(name: "WelcomeWindowTests", dependencies: ["WelcomeWindow"])
     ]
 )
