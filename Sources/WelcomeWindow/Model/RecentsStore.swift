@@ -10,6 +10,9 @@ public enum RecentsStore {
 
     /// Notification sent when the recent projects list is updated.
     public static let didUpdateNotification = Notification.Name("RecentsStore.didUpdate")
+    
+    /// For tests (or previews) before any API call.
+    public static var defaults: UserDefaults = .standard
 
     /// Internal representation of a bookmark entry.
     private struct BookmarkEntry: Codable, Equatable {
@@ -160,8 +163,8 @@ public enum RecentsStore {
     ///
     /// - Returns: An array of `BookmarkEntry` values decoded from UserDefaults.
     private static func loadBookmarks() -> [BookmarkEntry] {
-        guard let data = UserDefaults.standard.data(forKey: bookmarksKey),
-              let decoded = try? PropertyListDecoder().decode([BookmarkEntry].self, from: data)
+        guard let data = defaults.data(forKey: bookmarksKey),
+                let decoded = try? PropertyListDecoder().decode([BookmarkEntry].self, from: data)
         else { return [] }
         return decoded
     }
@@ -171,7 +174,7 @@ public enum RecentsStore {
     /// - Parameter entries: The bookmark entries to save.
     private static func saveBookmarks(_ entries: [BookmarkEntry]) {
         guard let data = try? PropertyListEncoder().encode(entries) else { return }
-        UserDefaults.standard.set(data, forKey: bookmarksKey)
+        defaults.set(data, forKey: bookmarksKey)
         NotificationCenter.default.post(name: didUpdateNotification, object: nil)
     }
 
