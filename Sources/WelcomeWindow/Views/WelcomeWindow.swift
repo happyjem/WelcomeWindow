@@ -36,40 +36,7 @@ public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
     }
 
     public var body: some Scene {
-        #if swift(>=5.9)
-        if #available(macOS 15, *) {
-            return Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
-                WelcomeWindowView(
-                    iconImage: iconImage,
-                    title: title,
-                    subtitleView: subtitleView,
-                    buildActions: buildActions,
-                    onDrop: onDrop,
-                    customRecentsList: customRecentsList
-                )
-                .frame(width: 740, height: 460)
-                .task {
-                    if let window = NSApp.findWindow(DefaultSceneID.welcome) {
-                        window.standardWindowButton(.closeButton)?.isHidden = true
-                        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
-                        window.standardWindowButton(.zoomButton)?.isHidden = true
-                        window.hasShadow = true
-                        window.isMovableByWindowBackground = true
-                    }
-                }
-            }
-            .windowStyle(.plain)
-            .windowResizability(.contentSize)
-            .defaultLaunchBehavior(.presented)
-        } else {
-            return legacyWindow
-        }
-        #else
-        return legacyWindow
-        #endif
-    }
 
-    private var legacyWindow: some Scene {
         Window("Welcome To \(Bundle.displayName)", id: DefaultSceneID.welcome) {
             WelcomeWindowView(
                 iconImage: iconImage,
@@ -79,20 +46,20 @@ public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
                 onDrop: onDrop,
                 customRecentsList: customRecentsList
             )
-            .frame(width: 740, height: 432)
+            .frame(width: 740, height: 460)
             .task {
                 if let window = NSApp.findWindow(DefaultSceneID.welcome) {
-                    window.styleMask.insert(.borderless)
+                    window.styleMask.insert(.fullSizeContentView)
                     window.standardWindowButton(.closeButton)?.isHidden = true
                     window.standardWindowButton(.miniaturizeButton)?.isHidden = true
                     window.standardWindowButton(.zoomButton)?.isHidden = true
-                    window.backgroundColor = .clear
+                    window.hasShadow = true
                     window.isMovableByWindowBackground = true
                 }
             }
         }
-        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
+        .windowStyle(.hiddenTitleBar)
     }
 }
 

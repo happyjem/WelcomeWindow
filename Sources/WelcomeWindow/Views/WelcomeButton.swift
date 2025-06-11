@@ -35,17 +35,33 @@ public struct WelcomeButton: View {
         })
         .buttonStyle(WelcomeActionButtonStyle())
         .focused($isfocused)
-        .modifier(FocusRingModifier(isFocused: isfocused, shape: .rect(cornerRadius: 8)))
+        .modifier(FocusRingModifier(isFocused: isfocused, shape: buttonShape))
+    }
+
+    private var buttonShape: some InsettableShape {
+        if #available(macOS 26, *) {
+            return .capsule
+        } else {
+            return .rect(cornerRadius: 8)
+        }
     }
 }
 
 struct WelcomeActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .contentShape(Rectangle())
-            .padding(7)
-            .frame(height: 36)
-            .background(Color(.labelColor).opacity(configuration.isPressed ? 0.1 : 0.05))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+        @ViewBuilder var buttonBody: some View {
+            let base = configuration.label
+                .contentShape(Rectangle())
+                .padding(7)
+                .frame(height: 36)
+                .background(Color(.labelColor).opacity(configuration.isPressed ? 0.1 : 0.05))
+
+            if #available(macOS 26, *) {
+                base.clipShape(Capsule())
+            } else {
+                base.clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+        }
+        return buttonBody
     }
 }
