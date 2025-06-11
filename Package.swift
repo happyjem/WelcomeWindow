@@ -10,7 +10,8 @@ let package = Package(
     products: [
         .library(
             name: "WelcomeWindow",
-            targets: ["WelcomeWindow"]),
+            targets: ["WelcomeWindow"]
+        ),
     ],
     dependencies: [
         .package(
@@ -24,6 +25,7 @@ let package = Package(
             plugins: [
                 .plugin(name: "SwiftLint", package: "SwiftLintPlugin")
             ]
-        )
+        ),
+        .testTarget(name: "WelcomeWindowTests", dependencies: ["WelcomeWindow"])
     ]
 )
