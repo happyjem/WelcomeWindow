@@ -3,6 +3,7 @@ import CoreSpotlight
 import OSLog
 
 /// A utility store for managing recent project file access using security-scoped bookmarks.
+@MainActor
 public enum RecentsStore {
 
     /// The UserDefaults key for storing recent project bookmarks.
@@ -10,9 +11,9 @@ public enum RecentsStore {
 
     /// Notification sent when the recent projects list is updated.
     public static let didUpdateNotification = Notification.Name("RecentsStore.didUpdate")
-    
+
     /// For tests (or previews) before any API call.
-    @MainActor public static var defaults: UserDefaults = .standard
+    public static var defaults: UserDefaults = .standard
 
     /// Internal representation of a bookmark entry.
     private struct BookmarkEntry: Codable, Equatable {
