@@ -61,7 +61,7 @@ public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
                     window.standardWindowButton(.closeButton)?.isHidden = true
                     window.standardWindowButton(.miniaturizeButton)?.isHidden = true
                     window.standardWindowButton(.zoomButton)?.isHidden = true
-                    window.hasShadow = true
+                    window.backgroundColor = .clear
                     window.isMovableByWindowBackground = true
                 }
             }
