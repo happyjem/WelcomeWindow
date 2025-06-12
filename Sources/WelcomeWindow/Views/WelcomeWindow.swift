@@ -19,6 +19,14 @@ public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
     let iconImage: Image?
     let title: String?
 
+    var isMacOS26: Bool {
+        if #available(macOS 26, *) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     public init(
         iconImage: Image? = nil,
         title: String? = nil,
@@ -46,7 +54,7 @@ public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
                 onDrop: onDrop,
                 customRecentsList: customRecentsList
             )
-            .frame(width: 740, height: 460)
+            .frame(width: 740, height: isMacOS26 ? 460 - 28 : 460)
             .task {
                 if let window = NSApp.findWindow(DefaultSceneID.welcome) {
                     window.styleMask.insert(.fullSizeContentView)

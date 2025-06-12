@@ -83,7 +83,6 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
                 }
             }
         }
-        .clipShape(.rect(cornerRadius: 8))
         .cursor(.current)
         .edgesIgnoringSafeArea(.top)
         .focused($focusedField, equals: FocusTarget.none)

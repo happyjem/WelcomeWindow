@@ -29,6 +29,14 @@ public struct WelcomeView<SubtitleView: View>: View {
     let iconImage: Image?
     let title: String?
 
+    var isMacOS26: Bool {
+        if #available(macOS 26, *) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     public init(
         iconImage: Image? = nil,
         title: String? = nil,
@@ -96,7 +104,7 @@ public struct WelcomeView<SubtitleView: View>: View {
             Spacer().frame(height: 40)
 
             HStack {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: isMacOS26 ? 6 : 8) {
                     switch actions {
                     case .none:
                         EmptyView()
