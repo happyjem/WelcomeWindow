@@ -79,7 +79,8 @@ extension NSDocumentController {
         onCancel: @escaping () -> Void
     ) {
 
-        // 1. Configure NSSavePanel ------------------------------------------------
+        // 1 ────────────────────────────────────────────────────────────────
+        // Configure the NSSavePanel
         let panel = NSSavePanel()
         panel.prompt               = configuration.prompt
         panel.title                = configuration.title
@@ -96,23 +97,54 @@ extension NSDocumentController {
         case .folder:
             panel.nameFieldStringValue =
                 URL(fileURLWithPath: configuration.defaultFileName)
-                    .deletingPathExtension().lastPathComponent
-            panel.allowedContentTypes  = []                // treat as folder
+                    .deletingPathExtension()
+                    .lastPathComponent
+            panel.allowedContentTypes  = []          // treat as plain folder
         }
 
         DispatchQueue.main.async { onDialogPresented() }
-        guard panel.runModal() == .OK,
-              let baseURL = panel.url else { onCancel(); return }
 
-        // 2. Derive the final document file URL ----------------------------------
-        let ext      = configuration.defaultFileType.preferredFilenameExtension ?? "file"
+        guard panel.runModal() == .OK,
+              let baseURL = panel.url         // e.g.  …/ProjectName
+        else {
+            onCancel()
+            return
+        }
+
+        // 2 ────────────────────────────────────────────────────────────────
+        // For a *folder* document, create the workspace directory up front.
+        if mode == .folder {
+            do {
+                try FileManager.default.createDirectory(
+                    at: baseURL,
+                    withIntermediateDirectories: true,
+                    attributes: nil
+                )
+            } catch {
+                NSAlert(error: error).runModal()
+                onCancel()
+                return
+            }
+        }
+
+        // 3 ────────────────────────────────────────────────────────────────
+        // Derive the final URL of the actual NSDocument header file.
+        //   …/ProjectName/ProjectName.circuitproj    (folder mode)
+        //   …/SomeFile.circuitproj                   (file mode)
+        let ext      = configuration
+            .defaultFileType
+            .preferredFilenameExtension ?? "file"
+
         let finalURL = (mode == .folder)
             ? baseURL.appendingPathComponent("\(baseURL.lastPathComponent).\(ext)")
             : baseURL
 
-        // 3. Create, write, and open the NSDocument ------------------------------
+        // 4 ────────────────────────────────────────────────────────────────
+        // Create, write and open the document.
         do {
-            let document  = try makeUntitledDocument(ofType: configuration.defaultFileType.identifier)
+            let document = try makeUntitledDocument(
+                ofType: configuration.defaultFileType.identifier
+            )
             document.fileURL = finalURL
 
             try document.write(
