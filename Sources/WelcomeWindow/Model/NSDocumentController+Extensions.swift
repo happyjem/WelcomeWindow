@@ -190,15 +190,15 @@ extension NSDocumentController {
         panel.directoryURL = configuration.directoryURL
         panel.level = .modalPanel
 
-        DispatchQueue.main.async { onDialogPresented() }
+        panel.begin { result in
+            guard result == .OK, let selectedURL = panel.url else {
+                onCancel()
+                return
+            }
 
-        let result = panel.runModal()
-        guard result == .OK, let selectedURL = panel.url else {
-            onCancel()
-            return
+            self.openDocument(at: selectedURL, onCompletion: onCompletion, onError: { _ in onCancel() })
         }
-
-        self.openDocument(at: selectedURL, onCompletion: onCompletion, onError: { _ in onCancel() })
+        onDialogPresented()
     }
 
     /// Opens a document at the specified URL and optionally tracks it in recent projects.
