@@ -1,35 +1,8 @@
-<p align="center">
-  <img src="https://github.com/CodeEditApp/WelcomeWindow/blob/main/.github/WelcomeWindow-Icon-128@2x.png?raw=true" height="128">
-  <h1 align="center">WelcomeWindow</h1>
-</p>
-
-<p align="center">
-  <a aria-label="Follow CodeEdit on X" href="https://x.com/CodeEditApp" target="_blank">
-    <img alt="" src="https://img.shields.io/badge/Follow%20@CodeEditApp-black.svg?style=for-the-badge&logo=X">
-  </a>
-  <a aria-label="Join the community on Discord" href="https://discord.gg/vChUXVf9Em" target="_blank">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Discord">
-  </a>
-  <a aria-label="Read the Documentation" href="https://codeeditapp.github.io/WelcomeWindow/documentation/welcomewindow/" target="_blank">
-    <img alt="" src="https://img.shields.io/badge/Documentation-black.svg?style=for-the-badge&logo=readthedocs&logoColor=blue">
-  </a>
-</p>
+# ``WelcomeWindow``
 
 A highly customizable welcome window built for macOS applications. This package supports NSDocument-based apps and offers the ability to override the recent list for other use cases. It's designed to provide a native and elegant welcome experience for your app at launch, with support for new/open document actions, drag-and-drop functionality, and dynamic layouts.
 
-![GitHub release](https://img.shields.io/github/v/release/CodeEditApp/WelcomeWindow?color=orange&label=latest%20release&sort=semver&style=flat-square)
-![Github Tests](https://img.shields.io/github/actions/workflow/status/CodeEditApp/WelcomeWindow/CI-push.yml?branch=main&label=tests&style=flat-square)
-![GitHub Repo stars](https://img.shields.io/github/stars/CodeEditApp/WelcomeWindow?style=flat-square)
-![GitHub forks](https://img.shields.io/github/forks/CodeEditApp/WelcomeWindow?style=flat-square)
-[![Discord Badge](https://img.shields.io/discord/951544472238444645?color=5865F2&label=Discord&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/vChUXVf9Em)
-
-![image](https://github.com/user-attachments/assets/0e0dbaaa-3b2a-4132-b073-5b8971750668)
-
-## Documentation
-
-This package is fully documented [here](https://codeeditapp.github.io/WelcomeWindow/documentation/welcomewindow/).
-
-## Usage
+## Overview
 
 To use welcome window, simply import the package
 
@@ -83,7 +56,17 @@ struct CodeEditApp: App {
 }
 ```
 
-## License
+## Topics
 
-Licensed under the [MIT license](https://github.com/CodeEditApp/WelcomeWindow/blob/main/LICENSE.md)
+### Example App
 
+A great way to get started is by checking out the example app in the `Example` folder.
+
+### Window Configuration
+
+- ``WelcomeWindow`` This window creates the styled window that is the core of WelcomeWindow.
+- ``WelcomeButton`` Use welcome buttons to create pre-designed buttons to go in your welcome window. These are common actions users may take to start a project, open an old project, or navigate somewhere useful in your app.
+
+### Recent Projects List
+
+- ``RecentsStore`` stores a list of bookmarked files or folders that your users can open from the welcome window. Call ``RecentsStore/documentOpened(at:)`` to tell the recents store about an opened document. The store will trim items to 100 history automatically, so don't worry about space or memory usage and call it often.
