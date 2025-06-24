@@ -83,7 +83,7 @@ struct CodeEditApp: App {
 }
 ```
 
-<details><summary>**Examples from real apps!**</summary>
+<details><summary>Examples from real apps!</summary>
 
 | [CodeEdit](https://github.com/CodeEditApp/CodeEdit)        | ![CodeEdit Demo Image](./.github/demos/codeedit.png)     |
 | ---------------------------------------------------------- | -------------------------------------------------------- |
