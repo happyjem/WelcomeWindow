@@ -85,9 +85,9 @@ struct CodeEditApp: App {
 
 <details><summary>Examples from real apps!</summary>
 
-| CodeEdit   | ![CodeEdit Demo Image](./github/demos/codeedit.png)     |
-| ---------- | ------------------------------------------------------- |
-| CircuitPro | ![CircuitPro Demo Image](./github/demos/circuitpro.png) |
+| CodeEdit   | ![CodeEdit Demo Image](./.github/demos/codeedit.png)     |
+| ---------- | -------------------------------------------------------- |
+| CircuitPro | ![CircuitPro Demo Image](./.github/demos/circuitpro.png) |
 
 </details>
 
