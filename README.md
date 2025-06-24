@@ -23,7 +23,7 @@ A highly customizable welcome window built for macOS applications. This package 
 ![GitHub forks](https://img.shields.io/github/forks/CodeEditApp/WelcomeWindow?style=flat-square)
 [![Discord Badge](https://img.shields.io/discord/951544472238444645?color=5865F2&label=Discord&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/vChUXVf9Em)
 
-![Demo Image](./.github/demo-header.png)
+![Demo Image](https://github.com/user-attachments/assets/6a30bf7a-1b46-4fe1-bf84-39305d8ba85f)
 
 ## Documentation
 
