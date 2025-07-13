@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AppKit
+import os
 
 public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
 
@@ -25,6 +26,7 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
     private let onDrop: ((_ url: URL, _ dismiss: @MainActor @Sendable @escaping () -> Void) -> Void)?
     private let customRecentsList: ((_ dismissWindow: @MainActor @Sendable @escaping () -> Void) -> RecentsView)?
     private let subtitleView: (() -> SubtitleView)?
+    private let openHandler: WelcomeOpenHandler?
 
     let iconImage: Image?
     let title: String?
@@ -35,7 +37,8 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
         subtitleView: (() -> SubtitleView)? = nil,
         buildActions: @escaping (_ dismissWindow: @Sendable @escaping () -> Void) -> WelcomeActions,
         onDrop: ((_ url: URL, _ dismiss: @Sendable @escaping () -> Void) -> Void)? = nil,
-        customRecentsList: ((_ dismissWindow: @Sendable @escaping () -> Void) -> RecentsView)? = nil
+        customRecentsList: ((_ dismissWindow: @Sendable @escaping () -> Void) -> RecentsView)? = nil,
+        openHandler: WelcomeOpenHandler? = nil
     ) {
         self.iconImage = iconImage
         self.title = title
@@ -43,11 +46,27 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
         self.buildActions = buildActions
         self.onDrop = onDrop
         self.customRecentsList = customRecentsList
+        self.openHandler = openHandler
+    }
+
+    private func defaultOpenHandler(urls: [URL], dismiss: @escaping @Sendable () -> Void) {
+        let dismissed = OSAllocatedUnfairLock(initialState: false)
+        for url in urls {
+            NSDocumentController.shared.openDocument(at: url) {
+                dismissed.withLock { isDismissed in
+                    if !isDismissed {
+                        isDismissed = true
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 
     public var body: some View {
         let dismiss = dismissWindow.callAsFunction
         let actions = buildActions(dismiss)
+        let effectiveOpen = openHandler ?? defaultOpenHandler
 
         return HStack(spacing: 0) {
             WelcomeView(
@@ -67,7 +86,8 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
                         recentProjects: $recentProjects,
                         selection: $selection,
                         focusedField: $focusedField,
-                        dismissWindow: dismiss
+                        dismissWindow: dismiss,
+                        openHandler: effectiveOpen
                     )
                 }
             }
