@@ -21,9 +21,9 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
     @State private var recentProjects: [URL] = RecentsStore.recentProjectURLs()
     @State private var selection: Set<URL> = []
 
-    private let buildActions: (_ dismissWindow: @escaping () -> Void) -> WelcomeActions
-    private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
-    private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
+    private let buildActions: (_ dismissWindow: @MainActor @Sendable @escaping () -> Void) -> WelcomeActions
+    private let onDrop: ((_ url: URL, _ dismiss: @MainActor @Sendable @escaping () -> Void) -> Void)?
+    private let customRecentsList: ((_ dismissWindow: @MainActor @Sendable @escaping () -> Void) -> RecentsView)?
     private let subtitleView: (() -> SubtitleView)?
 
     let iconImage: Image?
@@ -33,9 +33,9 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
         iconImage: Image? = nil,
         title: String? = nil,
         subtitleView: (() -> SubtitleView)? = nil,
-        buildActions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
-        onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil,
-        customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil
+        buildActions: @escaping (_ dismissWindow: @Sendable @escaping () -> Void) -> WelcomeActions,
+        onDrop: ((_ url: URL, _ dismiss: @Sendable @escaping () -> Void) -> Void)? = nil,
+        customRecentsList: ((_ dismissWindow: @Sendable @escaping () -> Void) -> RecentsView)? = nil
     ) {
         self.iconImage = iconImage
         self.title = title

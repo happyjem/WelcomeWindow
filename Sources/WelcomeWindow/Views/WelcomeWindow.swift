@@ -11,9 +11,9 @@ import SwiftUI
 /// and an optional custom recent projects list.
 public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
 
-    private let buildActions: (_ dismissWindow: @escaping () -> Void) -> WelcomeActions
-    private let customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)?
-    private let onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)?
+    private let buildActions: (_ dismissWindow: @Sendable @escaping () -> Void) -> WelcomeActions
+    private let customRecentsList: ((_ dismissWindow: @Sendable @escaping () -> Void) -> RecentsView)?
+    private let onDrop: ((_ url: URL, _ dismiss: @Sendable @escaping () -> Void) -> Void)?
     private let subtitleView: (() -> SubtitleView)?
 
     let iconImage: Image?
@@ -30,10 +30,10 @@ public struct WelcomeWindow<RecentsView: View, SubtitleView: View>: Scene {
     public init(
         iconImage: Image? = nil,
         title: String? = nil,
-        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
+        @ActionsBuilder actions: @MainActor @escaping @Sendable (_ dismissWindow: @Sendable @escaping () -> Void) -> WelcomeActions,
         customRecentsList: ((_ dismissWindow: @escaping () -> Void) -> RecentsView)? = nil,
         subtitleView: (() -> SubtitleView)? = nil,
-        onDrop: ((_ url: URL, _ dismiss: @escaping () -> Void) -> Void)? = nil
+        onDrop: (@Sendable (_ url: URL, _ dismiss: @Sendable @escaping () -> Void) -> Void)? = nil
     ) {
         self.iconImage = iconImage
         self.title = title
@@ -80,8 +80,8 @@ extension WelcomeWindow where RecentsView == EmptyView, SubtitleView == EmptyVie
     public init(
         iconImage: Image? = nil,
         title: String?    = nil,
-        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
-        onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
+        @ActionsBuilder actions: @MainActor @Sendable @escaping (_ dismissWindow: @Sendable @escaping () -> Void) -> WelcomeActions,
+        onDrop: (@Sendable (_ url: URL, _ dismissWindow: @Sendable @escaping () -> Void) -> Void)? = nil
     ) {
         self.init(
             iconImage: iconImage,
@@ -104,8 +104,8 @@ extension WelcomeWindow where RecentsView == EmptyView {
         iconImage: Image? = nil,
         title: String?    = nil,
         subtitleView: @escaping () -> SubtitleView,
-        @ActionsBuilder actions: @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
-        onDrop: ((_ url: URL, _ dismissWindow: @escaping () -> Void) -> Void)? = nil
+        @ActionsBuilder actions: @Sendable @escaping (_ dismissWindow: @escaping () -> Void) -> WelcomeActions,
+        onDrop: ((_ url: URL, _ dismissWindow: @Sendable @escaping () -> Void) -> Void)? = nil
     ) {
         self.init(
             iconImage: iconImage,
@@ -141,3 +141,4 @@ extension WelcomeWindow where SubtitleView == EmptyView {
         )
     }
 }
+

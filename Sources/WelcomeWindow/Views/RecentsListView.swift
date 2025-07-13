@@ -72,7 +72,9 @@ public struct RecentsListView: View {
         } primaryAction: { items in
             for url in items {
                 NSDocumentController.shared.openDocument(at: url) {
-                    dismissWindow()
+                    Task { @MainActor in
+                        dismissWindow()
+                    }
                 }
             }
         }
@@ -86,7 +88,9 @@ public struct RecentsListView: View {
             Button("") {
                 selection.forEach { url in
                     NSDocumentController.shared.openDocument(at: url) {
-                        dismissWindow()
+                        Task { @MainActor in
+                            dismissWindow()
+                        }
                     }
                 }
             }

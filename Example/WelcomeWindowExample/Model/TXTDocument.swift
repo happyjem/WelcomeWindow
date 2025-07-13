@@ -19,7 +19,9 @@ final class TXTDocument: NSDocument, ObservableObject {
         guard let string = String(data: data, encoding: .utf8) else {
             throw CocoaError(.fileReadCorruptFile)
         }
-        text = string
+        Task { @MainActor in
+            text = string
+        }
     }
 
     override func data(ofType typeName: String) throws -> Data {

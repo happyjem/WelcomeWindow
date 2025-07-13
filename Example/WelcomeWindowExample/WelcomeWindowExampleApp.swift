@@ -24,7 +24,9 @@ struct WelcomeWindowExampleApp: App {
                         action: {
                             NSDocumentController.shared.createFileDocumentWithDialog(
                                 configuration: .init(title: "Create new text document"),
-                                onCompletion: { dismiss() }
+                                onCompletion: {
+                                    dismiss()
+                                }
                             )
                         }
                     )
@@ -35,7 +37,11 @@ struct WelcomeWindowExampleApp: App {
                             NSDocumentController.shared.openDocumentWithDialog(
                                 configuration: .init(canChooseDirectories: true),
                                 onCompletion: { dismiss() },
-                                onCancel: { openWindow(id: "welcome") }
+                                onCancel: {
+                                    Task { @MainActor in
+                                        openWindow(id: "welcome")
+                                    }
+                                }
                             )
                         }
                     )
@@ -44,7 +50,7 @@ struct WelcomeWindowExampleApp: App {
                     print("File dropped at: \(url.path)")
 
                     Task {
-                        NSDocumentController.shared.openDocument(at: url, onCompletion: { dismiss() })
+                        await NSDocumentController.shared.openDocument(at: url, onCompletion: { dismiss() })
                     }
                 }
             )
