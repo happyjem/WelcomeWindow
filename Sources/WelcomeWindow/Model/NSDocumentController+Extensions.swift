@@ -25,8 +25,8 @@ extension NSDocumentController {
     public func createFileDocumentWithDialog(
         configuration: DocumentSaveDialogConfiguration = .init(),
         onDialogPresented: @escaping () -> Void = {},
-        onCompletion: @escaping () -> Void = {},
-        onCancel: @escaping () -> Void = {}
+        onCompletion: @Sendable @escaping () -> Void = {},
+        onCancel: @Sendable @escaping () -> Void = {}
     ) {
         _createDocument(
             mode: .file,
@@ -53,8 +53,8 @@ extension NSDocumentController {
     public func createFolderDocumentWithDialog(
         configuration: DocumentSaveDialogConfiguration,
         onDialogPresented: @escaping () -> Void = {},
-        onCompletion: @escaping () -> Void = {},
-        onCancel: @escaping () -> Void = {}
+        onCompletion: @Sendable @escaping () -> Void = {},
+        onCancel: @Sendable @escaping () -> Void = {}
     ) {
         _createDocument(
             mode: .folder,
@@ -100,8 +100,8 @@ extension NSDocumentController {
         mode: SaveMode,
         configuration: DocumentSaveDialogConfiguration,
         onDialogPresented: @escaping () -> Void,
-        onCompletion: @escaping () -> Void,
-        onCancel: @escaping () -> Void
+        onCompletion: @Sendable @escaping () -> Void,
+        onCancel: @Sendable @escaping () -> Void
     ) {
         // 1 ────────────────────────────────────────────────────────────────
         // Configure the NSSavePanel
@@ -157,8 +157,10 @@ extension NSDocumentController {
             )
 
             openDocument( at: finalURL, onCompletion: onCompletion, onError: { error in
-                NSAlert(error: error).runModal()
-                onCancel()
+                Task { @MainActor in
+                    NSAlert(error: error).runModal()
+                    onCancel()
+                }
             })
         } catch {
             NSAlert(error: error).runModal()
@@ -177,8 +179,8 @@ extension NSDocumentController {
     public func openDocumentWithDialog(
         configuration: DocumentOpenDialogConfiguration = DocumentOpenDialogConfiguration(),
         onDialogPresented: @escaping () -> Void = {},
-        onCompletion: @escaping () -> Void = {},
-        onCancel: @escaping () -> Void = {}
+        onCompletion: @Sendable @escaping () -> Void = {},
+        onCancel: @Sendable @escaping () -> Void = {}
     ) {
         let panel = NSOpenPanel()
         panel.title = configuration.title
@@ -189,12 +191,13 @@ extension NSDocumentController {
         panel.level = .modalPanel
 
         panel.begin { result in
-            guard result == .OK, let selectedURL = panel.url else {
-                onCancel()
-                return
+            Task { @MainActor in
+                guard result == .OK, let selectedURL = panel.url else {
+                    onCancel()
+                    return
+                }
+                self.openDocument(at: selectedURL, onCompletion: onCompletion, onError: { _ in onCancel() })
             }
-
-            self.openDocument(at: selectedURL, onCompletion: onCompletion, onError: { _ in onCancel() })
         }
         onDialogPresented()
     }
@@ -208,25 +211,25 @@ extension NSDocumentController {
     @MainActor
     public func openDocument(
         at url: URL,
-        onCompletion: @escaping () -> Void = {},
-        onError: @escaping (Error) -> Void = { _ in }
+        onCompletion: @Sendable @escaping () -> Void = {},
+        onError: @Sendable @escaping (Error) -> Void = { _ in }
     ) {
         let accessGranted = RecentsStore.beginAccessing(url)
         openDocument(withContentsOf: url, display: true) { _, _, error in
             if let error {
-                if accessGranted {
-                    RecentsStore.endAccessing(url)
-                }
-                DispatchQueue.main.async {
+                Task { @MainActor in
+                    if accessGranted {
+                        RecentsStore.endAccessing(url)
+                    }
                     NSAlert(error: error).runModal()
+                    onError(error)
                 }
-                onError(error)
             } else {
-                RecentsStore.documentOpened(at: url)
-                DispatchQueue.main.async {
+                Task { @MainActor in
+                    RecentsStore.documentOpened(at: url)
                     NSApp.activate(ignoringOtherApps: true)
+                    onCompletion()
                 }
-                onCompletion()
             }
         }
     }

@@ -194,7 +194,11 @@ public enum RecentsStore {
         }
         CSSearchableIndex.default().indexSearchableItems(searchableItems) { error in
             if let error = error {
-                logger.error("Failed to donate recent projects, error: \(error.localizedDescription)")
+                Task {
+                    await MainActor.run {
+                        logger.error("Failed to donate recent projects, error: \(error.localizedDescription)")
+                    }
+                }
             }
         }
     }

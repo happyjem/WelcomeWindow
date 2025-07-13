@@ -21,7 +21,9 @@ final class FolderDocument: NSDocument, ObservableObject {
                 userInfo: [NSLocalizedDescriptionKey: "Not a folder"]
             )
         }
-        folderURL = url
+        Task { @MainActor in
+            folderURL = url
+        }
     }
 
     override func makeWindowControllers() {

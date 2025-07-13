@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "WelcomeWindow",
     platforms: [
-        .macOS(.v13)
+        .macOS(.v15)
     ],
     products: [
         .library(
