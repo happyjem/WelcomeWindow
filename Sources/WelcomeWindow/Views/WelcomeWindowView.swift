@@ -95,7 +95,6 @@ public struct WelcomeWindowView<RecentsView: View, SubtitleView: View>: View {
             // Initial focus
             focusedField = .recentProjects
         }
-
         .onDrop(of: [.fileURL], isTargeted: .constant(true)) { providers in
             NSApp.activate(ignoringOtherApps: true)
             providers.forEach {
